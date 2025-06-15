@@ -1,4 +1,13 @@
 @import "tailwindcss";
+
+
+@font-face {
+  font-family: 'Noto Sans IPA';
+  src: url('/fonts/NotoSansIPA-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   color-scheme: light dark; 
@@ -12,4 +21,8 @@ body {
   --bg-color: #111827;
   --text-color: #f3f4f6;
   --accent-color: #60a5fa;
+}
+
+.keyboard-open {
+  padding-bottom: 300px; 
 }
