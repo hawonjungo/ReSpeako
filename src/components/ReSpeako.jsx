@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import { ThemeContext } from './ThemeContext';
 import { Capacitor } from '@capacitor/core';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
+import RotatingText from './RotatingText'
 
 const ReSpeako = () => {
   const [text, setText] = useState('');
@@ -11,7 +12,6 @@ const ReSpeako = () => {
   const [ipa, setIpa] = useState('');
   const [definition, setDefinition] = useState('');
   const [ipaError, setIpaError] = useState('');
-  const [slogan, setSlogan] = useState('Speak Clearly, Sound Brilliant.');
   const recognitionRef = useRef(null);
   const finalTextRef = useRef('');
   const userStoppedRef = useRef(false);
@@ -204,21 +204,42 @@ const ReSpeako = () => {
   return (
     <div
       ref={containerRef}
-      className={`h-full p-8 flex flex-col items-center justify-start
-      ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'} min-w-[320px] pt-2
+      className={`h-full p-8 flex flex-col items-center justify-start  
+      ${darkMode ? 'bg-gray text-white' : 'bg-white text-black'} min-w-[320px] pt-2
       overflow-y-auto`}
     >
       <img src="/rosaSinging.png" alt="Banner" />
-      <h1 className="md:text-6xl text-4xl font-bold mb-2 text-center">🎙️ ReSpeako</h1>
-      <p className="text-center italic text-gray-500 mb-6">{slogan}</p>
+      <h1 className="md:text-6xl text-4xl font-bold mb-2 text-center items-center flex flex-nowrap">🎙️ Re  <RotatingText
 
+        texts={['Speako', 'Listeno', 'Pronuno',]}
+
+        mainClassName=" px-2 sm:px-2 md:px-3 py-0.5 sm:py-1 md:py-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent"
+
+        staggerFrom={"last"}
+
+        initial={{ y: "100%" }}
+
+        animate={{ y: 0 }}
+
+        exit={{ y: "-120%" }}
+
+        staggerDuration={0.025}
+
+        splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+
+        transition={{ type: "spring", damping: 30, stiffness: 400 }}
+
+        rotationInterval={5000}
+
+      /></h1>
+    
       {/* 🎤 Speech to Text */}
-      <div className="w-full max-w-md mb-8">
+      <div className="w-full max-w-md mb-8 mt-12">
         <h2 className="font-semibold mb-2">🎤 Speech to Text </h2>
         <textarea
           value={text}
           readOnly
-          className="w-full h-24 p-3 border border-gray-300 rounded mb-2 text-lg"
+          className="w-full h-24 p-3 border border-gray-300 rounded mb-2 text-lg shadow-[0_3px_10px_rgb(0,0,0,0.2)]"
           placeholder="Your speech will appear here..."
           onFocus={e => {
             setTimeout(() => {
@@ -226,12 +247,11 @@ const ReSpeako = () => {
             }, 400);
           }}
         />
-        <button
-          onClick={handleListen}
-          className={`w-full py-2 text-white rounded
-            ${listening ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-        >
-          {listening ? 'Listening...' : 'Start Speaking'}
+        <button className="p-[3px] relative" onClick={handleListen}>
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+          <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
+            {listening ? 'Listening...' : 'Start Speaking'}
+          </div>
         </button>
       </div>
 
@@ -241,7 +261,7 @@ const ReSpeako = () => {
         <textarea
           value={speakText}
           onChange={e => setSpeakText(e.target.value)}
-          className="w-full h-24 p-3 border border-gray-300 rounded mb-2 text-lg"
+          className="w-full h-24 p-3 border border-gray-300 rounded mb-2 text-lg shadow-[0_3px_10px_rgb(0,0,0,0.2)]"
           placeholder="Type something and click to hear..."
           onFocus={e => {
             setTimeout(() => {
@@ -249,11 +269,13 @@ const ReSpeako = () => {
             }, 400);
           }}
         />
-        <button
-          onClick={handleSpeak}
-          className="w-full py-2 text-white bg-green-600 hover:bg-green-700 rounded"
-        >
-          Speak This Text
+        
+
+        <button className="p-[3px] relative" onClick={handleSpeak}>
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+          <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
+            Speak Text
+          </div>
         </button>
       </div>
 
@@ -264,7 +286,7 @@ const ReSpeako = () => {
           type="text"
           value={word}
           onChange={e => setWord(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded mb-2 text-lg"
+          className="w-full p-3 border border-gray-300 rounded mb-2 text-lg shadow-[0_3px_10px_rgb(0,0,0,0.2)]"
           placeholder="Enter a word (English)..."
           onFocus={e => {
             setTimeout(() => {
@@ -272,11 +294,11 @@ const ReSpeako = () => {
             }, 400);
           }}
         />
-        <button
-          onClick={fetchIPA}
-          className="w-full py-2 text-white bg-purple-600 hover:bg-purple-700 rounded"
-        >
-          Check IPA
+        <button className="p-[3px] relative" onClick={fetchIPA}>
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+          <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
+            Check IPA
+          </div>
         </button>
         {ipa && (
           <div className="mt-4 text-left">
