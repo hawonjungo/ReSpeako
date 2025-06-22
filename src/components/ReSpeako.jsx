@@ -4,10 +4,11 @@ import { Capacitor } from '@capacitor/core';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import RotatingText from './RotatingText'
 
+import StarBorder from './StarBorder'
+
 const ReSpeako = () => {
   const [text, setText] = useState('');
   const [listening, setListening] = useState(false);
-  const [speakText, setSpeakText] = useState('');
   const [word, setWord] = useState('');
   const [ipa, setIpa] = useState('');
   const [definition, setDefinition] = useState('');
@@ -155,13 +156,13 @@ const ReSpeako = () => {
   };
 
   const handleSpeak = async () => {
-    if (!speakText.trim()) return;
+    if (!text.trim()) return;
 
     if (Capacitor.isNativePlatform()) {
       try {
         const { TextToSpeech } = await import('@capacitor-community/text-to-speech');
         await TextToSpeech.speak({
-          text: speakText,
+          text: text,
           lang: 'en-US',
           rate: 1.0,
           pitch: 1.0,
@@ -172,7 +173,7 @@ const ReSpeako = () => {
         console.error(err);
       }
     } else {
-      const utterance = new SpeechSynthesisUtterance(speakText);
+      const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       window.speechSynthesis.speak(utterance);
     }
@@ -205,79 +206,66 @@ const ReSpeako = () => {
     <div
       ref={containerRef}
       className={`h-full p-8 flex flex-col items-center justify-start  
-      ${darkMode ? 'bg-gray text-white' : 'bg-white text-black'} min-w-[320px] pt-2
+      ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-2
       overflow-y-auto`}
     >
       <img src="/rosaSinging.png" alt="Banner" />
       <h1 className="md:text-6xl text-4xl font-bold mb-2 text-center items-center flex flex-nowrap">🎙️ Re  <RotatingText
 
         texts={['Speako', 'Listeno', 'Pronuno',]}
-
         mainClassName=" px-2 sm:px-2 md:px-3 py-0.5 sm:py-1 md:py-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent"
-
         staggerFrom={"last"}
-
         initial={{ y: "100%" }}
-
         animate={{ y: 0 }}
-
         exit={{ y: "-120%" }}
-
         staggerDuration={0.025}
-
         splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-
         transition={{ type: "spring", damping: 30, stiffness: 400 }}
-
         rotationInterval={5000}
-
       /></h1>
-    
+      <p className="italic text-yellow-500 font-semibold italic text-sm text-center mb-6 max-w-2xl">
+        Make Every Word Count!
+      </p>
+
+
+
       {/* 🎤 Speech to Text */}
       <div className="w-full max-w-md mb-8 mt-12">
         <h2 className="font-semibold mb-2">🎤 Speech to Text </h2>
-        <textarea
-          value={text}
-          readOnly
-          className="w-full h-24 p-3 border border-gray-300 rounded mb-2 text-lg shadow-[0_3px_10px_rgb(0,0,0,0.2)]"
-          placeholder="Your speech will appear here..."
-          onFocus={e => {
-            setTimeout(() => {
-              e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 400);
-          }}
-        />
-        <button className="p-[3px] relative" onClick={handleListen}>
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-          <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
-            {listening ? 'Listening...' : 'Start Speaking'}
-          </div>
-        </button>
+        <StarBorder
+          color="cyan"
+          speed="3s"
+        >
+          <textarea
+            id="speech-text"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            className="w-full h-24 p-3 border-none  outline-none focus:outline-none rounded mb-2 text-lg"
+            placeholder="Speak Up with Confidence..."
+            onFocus={e => {
+              setTimeout(() => {
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 400);
+            }}
+          />
+        </StarBorder>
+        <div className='flex  sm:flex-row gap-4 items-center justify-between mt-4'>
+          <button className="p-[3px] relative" onClick={handleListen}>
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+            <div className="px-4 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
+              {listening ? 'Listening...' : 'Start Record'}
+            </div>
+          </button>
+          <button className="p-[3px] relative" onClick={handleSpeak}>
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+            <div className="px-4 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
+              Speak
+            </div>
+          </button>
+        </div>
+
       </div>
 
-      {/* 🔊 Text to Speech */}
-      <div className="w-full max-w-md mb-8">
-        <h2 className="font-semibold mb-2">🔊 Text to Speech</h2>
-        <textarea
-          value={speakText}
-          onChange={e => setSpeakText(e.target.value)}
-          className="w-full h-24 p-3 border border-gray-300 rounded mb-2 text-lg shadow-[0_3px_10px_rgb(0,0,0,0.2)]"
-          placeholder="Type something and click to hear..."
-          onFocus={e => {
-            setTimeout(() => {
-              e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 400);
-          }}
-        />
-        
-
-        <button className="p-[3px] relative" onClick={handleSpeak}>
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-          <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
-            Speak Text
-          </div>
-        </button>
-      </div>
 
       {/* 🧾 Check IPA */}
       <div className="w-full max-w-md">
