@@ -4,6 +4,10 @@ import './App.css'
 import ReSpeako from './components/ReSpeako'
 import ThemeToggle from './components/ThemeToggle'
 import ThemeProvider from './components/ThemeContext'
+import CatPawBtn from './components/CatpawBtn'
+
+import { HashRouter, Routes, Route } from 'react-router-dom'
+import IPAPronounce from './components/IPAPronounce' 
 
 function App() {
   const [count, setCount] = useState(0)
@@ -24,24 +28,20 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="flex flex-col min-h-screen relative">
-        <div className='absolute right-8 top-8 z-10'>
-          <ThemeToggle />
+      <HashRouter>
+        <div className="flex flex-col min-h-screen relative">
+          <div className='absolute right-8 top-8 z-10'>
+            <ThemeToggle />
+          </div>
+          <Routes>
+            <Route path="/" element={<ReSpeako />} />
+            <Route path="/ipa-pronounce" element={<IPAPronounce />} />
+          </Routes>
+          <div className='sticky bottom-0 left-0 right-0 z-10'>
+            <CatPawBtn />
+          </div>
         </div>
-        <div
-          className="flex-1"
-          style={{
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            minHeight: 0,
-            maxHeight: '100vh',
-            paddingBottom: keyboardPadding,
-            transition: 'padding-bottom 0.2s'
-          }}
-        >
-          <ReSpeako />
-        </div>
-      </div>
+      </HashRouter>
     </ThemeProvider>
   )
 }

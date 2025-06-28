@@ -5,6 +5,7 @@ import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import RotatingText from './RotatingText'
 
 import StarBorder from './StarBorder'
+import CatPawBtn from './CatpawBtn';
 
 const ReSpeako = () => {
   const [text, setText] = useState('');
@@ -205,7 +206,7 @@ const ReSpeako = () => {
   return (
     <div
       ref={containerRef}
-      className={`h-full p-8 flex flex-col items-center justify-start  
+      className={`relative h-full pb-40 p-8  flex flex-col items-center justify-start  
       ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-2
       overflow-y-auto`}
     >
