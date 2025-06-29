@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 
 const CatPawBtn = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const toggle = () => setIsOpen(!isOpen);
+  const toggle = () => {
+    
+    if (isOpen) {
+      navigate("/");
+    }
+    setIsOpen(!isOpen);
+  };
 
   const navigate = useNavigate();
 
@@ -12,6 +18,7 @@ const CatPawBtn = () => {
   const buttonLabels = ["IPA", "Vowels Duel", "Sound Vault"];
   const handleClick = (index) => {
     if (index === 0) navigate("/ipa-pronounce");
+
     // Add more navigation
     setIsOpen(false); //Close menu after click
   };

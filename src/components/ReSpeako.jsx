@@ -5,7 +5,6 @@ import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import RotatingText from './RotatingText'
 
 import StarBorder from './StarBorder'
-import CatPawBtn from './CatpawBtn';
 
 const ReSpeako = () => {
   const [text, setText] = useState('');

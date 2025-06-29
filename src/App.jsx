@@ -37,7 +37,7 @@ function App() {
             <Route path="/" element={<ReSpeako />} />
             <Route path="/ipa-pronounce" element={<IPAPronounce />} />
           </Routes>
-          <div className='sticky bottom-0 left-0 right-0 z-10'>
+          <div className='sticky bottom-20 left-0 right-0 z-10'>
             <CatPawBtn />
           </div>
         </div>
