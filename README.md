@@ -4,7 +4,8 @@
 ReSpeako is a versatile language tool application built with React and Capacitor. It empowers users with speech-to-text, text-to-speech, and an IPA (International Phonetic Alphabet) lookup feature, aiming to assist with language learning and pronunciation. The application is designed to be cross-platform, with the current configuration targeting Android.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/948c7a7c-60ec-4cdf-8a5c-4457aa8ed962" alt="image" />
+  <img src="https://github.com/user-attachments/assets/948c7a7c-60ec-4cdf-8a5c-4457aa8ed962" alt="main" />
+  <img src="https://github.com/user-attachments/assets/88defbf5-8286-43aa-b323-f589ba262ff5" alt="ipa" />
 
 
 </p>
