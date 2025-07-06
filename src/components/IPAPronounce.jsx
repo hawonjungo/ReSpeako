@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { ThemeContext } from './ThemeContext';
 import RotatingText from './RotatingText';
+import StarBorder from './StarBorder';
 
 const IPAPronounce = () => {
 
@@ -62,12 +63,12 @@ const IPAPronounce = () => {
           const { label, highlight } = char;
           const parts = label.split(highlight);
           return (
-            <button
-              key={idx}
-              className="flex flex-col items-center justify-center pt-0 pb-1 p-4 rounded-2xl bg-white shadow hover:bg-gray-100"
-            >
-              <span className="text-4xl font-bold text-gray-600 ">{char.symbol}</span>
-              <span className="text-xl text-gray-600">
+            <StarBorder key={idx} >
+              <div
+                className="flex flex-col items-center justify-center w-max p-2 hover:bg-gray-100"
+              >
+                <span className="text-4xl font-bold  ">{char.symbol}</span>
+              <span className="text-xl">
                 {parts[0]}
                 <span className="underline decoration-blue-500 underline-offset-2 text-red-600">
                   {highlight}
@@ -77,9 +78,11 @@ const IPAPronounce = () => {
               <img
                 src={char.icon}
                 alt={char.label}
-                className="w-8 h-8 mt-1"
+                className="w-8 h-8 mt-1  object-contain"
               />
-            </button>
+            </div>
+            </StarBorder>
+            
           )
         })}
       </div>

@@ -205,7 +205,7 @@ const ReSpeako = () => {
             ref={inputRef}
             value={text}
             onChange={e => setText(e.target.value)}
-            className="w-full h-24 p-3 rounded text-lg outline-none"
+            className="w-full h-24 p-3 rounded text-lg outline-none py-[16px] px-[26px]"
             placeholder="Speak Up with Confidence..."
             onFocus={() => {
               setTimeout(() => {
