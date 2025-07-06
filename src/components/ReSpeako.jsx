@@ -178,7 +178,7 @@ const ReSpeako = () => {
   return (
     <div
       ref={containerRef}
-      className={`relative min-h-screen pb-40 p-8 flex flex-col items-center justify-start ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-2 overflow-y-auto`}
+      className={`relative  pb-40 p-8 flex flex-col items-center justify-start ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-2 overflow-y-auto`}
       style={{ paddingBottom: keyboardPadding }}
     >
       <img src="/rosaSinging.png" alt="Banner" />

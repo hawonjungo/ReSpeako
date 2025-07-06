@@ -34,7 +34,7 @@ const CatPawBtn = () => {
       )}
 
       {/* Floating Action Area */}
-       <div className="absolute bottom-0 right-2 z-20 w-40 h-40 flex items-center justify-center">
+       <div className="absolute bottom-4 right-16 z-10 flex items-center justify-center">
 
         {/* Main Button */}
         <button
