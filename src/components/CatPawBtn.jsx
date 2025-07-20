@@ -18,6 +18,8 @@ const CatPawBtn = () => {
   const buttonLabels = ["IPA", "Vowels Duel", "Sound Vault"];
   const handleClick = (index) => {
     if (index === 0) navigate("/ipa-pronounce");
+    if (index === 1) navigate("/loop-lab");
+    if (index === 2) navigate("/sound-vault");
 
     // Add more navigation
     setIsOpen(false); //Close menu after click

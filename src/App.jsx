@@ -8,6 +8,7 @@ import CatPawBtn from './components/CatpawBtn'
 
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import IPAPronounce from './components/IPAPronounce' 
+import LoopLab from './components/LoopLab'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -36,6 +37,7 @@ function App() {
           <Routes>
             <Route path="/" element={<ReSpeako />} />
             <Route path="/ipa-pronounce" element={<IPAPronounce />} />
+            <Route path="/loop-lab" element={<LoopLab />} />
           </Routes>
           <div className='sticky bottom-20 left-0 right-0 z-10'>
             <CatPawBtn />
