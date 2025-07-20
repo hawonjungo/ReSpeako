@@ -31,7 +31,7 @@ const StarBorder = ({
           animationDuration: speed,
         }}
       ></div>
-      <div className={`relative flex z-1 ${darkMode ? 'bg-gradient-to-b from-gray-100 to-gray-300 text-black border-gray-200 ' : 'bg-gradient-to-b from-black to-gray-900 text-white border-gray-800'} border   text-center text-[16px] justify-center rounded-[20px]`}>
+      <div className={`relative flex z-1 ${darkMode ?  'bg-gradient-to-b from-black to-gray-900 text-white border-gray-800' : 'bg-gradient-to-b from-gray-100 to-gray-300 text-black border-gray-200 ' } border   text-center text-[16px] justify-center rounded-[20px]`}>
         {children}
       </div>
     </Component>
