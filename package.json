@@ -1,5 +1,6 @@
 {
   "name": "respeako",
+  "homepage": "https://respeako.relifes.net",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -24,7 +25,8 @@
     "framer-motion": "^12.18.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.3"
+    "react-router-dom": "^7.6.3",
+    "subtitles-parser-vtt": "^0.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

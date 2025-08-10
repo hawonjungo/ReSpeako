@@ -1,102 +1,172 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const LoopLab = () => {
-  const videoRef = useRef(null);
-  const [start, setStart] = useState(60); // in seconds
-  const [end, setEnd] = useState(360);    // in seconds
-  const [delay, setDelay] = useState(5);  // in seconds
-  const [looping, setLooping] = useState(false);
+  const playerRef = useRef(null);
+  const [startTime, setStartTime] = useState(0);
+  const [endTime, setEndTime] = useState(30);
+  const [loopDelay, setLoopDelay] = useState(0);
+  const [isLooping, setIsLooping] = useState(false);
+  const [loopForever, setLoopForever] = useState(true);
+  const [videoTitle, setVideoTitle] = useState('');
+  // Use demo subtitles only
+  const [subtitles] = useState([
+    { start: 0, end: 5, text: 'Welcome to LoopLab!' },
+    { start: 6, end: 15, text: 'Practice your listening skills here.' },
+    { start: 16, end: 30, text: 'Enjoy looping and subtitles!' },
+  ]);
+  const [currentSubtitle, setCurrentSubtitle] = useState('');
+  const loopIntervalRef = useRef(null);
 
   useEffect(() => {
-    let interval;
-    if (looping) {
-      interval = setInterval(() => {
-        const video = videoRef.current;
-        if (video && video.currentTime >= end) {
-          video.pause();
-          setTimeout(() => {
-            video.currentTime = start;
-            video.play();
-          }, delay * 1000);
-        }
-      }, 500);
-    }
-    return () => clearInterval(interval);
-  }, [looping, start, end, delay]);
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-  const handleStart = () => {
-    const video = videoRef.current;
-    if (video) {
-      video.currentTime = start;
-      video.play();
-      setLooping(true);
+    window.onYouTubeIframeAPIReady = () => {
+      playerRef.current = new window.YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: 'jU9ssDa_IVY',
+        playerVars: {
+          autoplay: 0,
+          cc_load_policy: 1,
+        },
+        events: {
+          onReady: () => {
+            fetchVideoTitle();
+          },
+        },
+      });
+    };
+
+    return () => {
+      clearInterval(loopIntervalRef.current);
+    };
+  }, []);
+
+  const fetchVideoTitle = async () => {
+    try {
+      const response = await fetch(
+        'https://noembed.com/embed?url=https://www.youtube.com/watch?v=jU9ssDa_IVY'
+      );
+      const data = await response.json();
+      setVideoTitle(data.title || '');
+    } catch (err) {
+      console.error('Failed to fetch video title:', err);
     }
   };
 
-  const handleStop = () => {
-    const video = videoRef.current;
-    if (video) video.pause();
-    setLooping(false);
+  // Loop logic: always running while isLooping and loopForever are true
+  useEffect(() => {
+    clearInterval(loopIntervalRef.current);
+    if (isLooping && loopForever) {
+      loopIntervalRef.current = setInterval(() => {
+        if (playerRef.current && playerRef.current.getCurrentTime) {
+          const currentTime = playerRef.current.getCurrentTime();
+          // Loop video
+          if (currentTime >= endTime) {
+            playerRef.current.pauseVideo();
+            setTimeout(() => {
+              playerRef.current.seekTo(startTime);
+              playerRef.current.playVideo();
+            }, loopDelay * 1000);
+          }
+          // Show subtitle
+          const sub = subtitles.find((s) => currentTime >= s.start && currentTime <= s.end);
+          setCurrentSubtitle(sub ? sub.text : '');
+        }
+      }, 300);
+    }
+    return () => clearInterval(loopIntervalRef.current);
+  }, [isLooping, loopForever, startTime, endTime, loopDelay, subtitles]);
+
+  // Stop loop when checkbox unticked or button clicked
+  const stopLoop = () => {
+    setIsLooping(false);
+    clearInterval(loopIntervalRef.current);
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-center">🎧 WFD Video Loop</h2>
-      
-      <video
-        ref={videoRef}
-        src="/videos/wfd350.mp4"
-        controls
-        className="w-full rounded shadow mb-4"
-      />
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">🎧 LoopLab - YouTube Loop Practice</h1>
 
-      <div className="flex flex-col gap-2">
+      {videoTitle && (
+        <p className="text-lg text-gray-700 font-medium">🎬 {videoTitle}</p>
+      )}
+
+      <div className="flex gap-4 flex-wrap">
         <label>
-          ⏱️ Start Time (mm:ss):
-          <input
-            type="text"
-            value={secondsToMMSS(start)}
-            onChange={(e) => setStart(mmssToSeconds(e.target.value))}
-            className="border p-1 rounded ml-2"
-          />
-        </label>
-        <label>
-          ⏱️ End Time (mm:ss):
-          <input
-            type="text"
-            value={secondsToMMSS(end)}
-            onChange={(e) => setEnd(mmssToSeconds(e.target.value))}
-            className="border p-1 rounded ml-2"
-          />
-        </label>
-        <label>
-          🔁 Delay (seconds):
+          Start (seconds):
           <input
             type="number"
-            value={delay}
-            onChange={(e) => setDelay(Number(e.target.value))}
-            className="border p-1 rounded ml-2"
+            value={startTime}
+            onChange={(e) => setStartTime(Number(e.target.value))}
+            className="ml-2 border px-2 py-1 rounded"
           />
+        </label>
+
+        <label>
+          End (seconds):
+          <input
+            type="number"
+            value={endTime}
+            onChange={(e) => setEndTime(Number(e.target.value))}
+            className="ml-2 border px-2 py-1 rounded"
+          />
+        </label>
+
+        <label>
+          Delay (seconds):
+          <input
+            type="number"
+            value={loopDelay}
+            onChange={(e) => setLoopDelay(Number(e.target.value))}
+            className="ml-2 border px-2 py-1 rounded"
+          />
+        </label>
+
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={loopForever}
+            onChange={(e) => {
+              setLoopForever(e.target.checked);
+              if (!e.target.checked) stopLoop();
+            }}
+            className="mr-2"
+          />
+          Loop Forever
         </label>
       </div>
 
-      <div className="mt-4 flex justify-center gap-4">
-        <button onClick={handleStart} className="px-4 py-2 bg-green-500 text-white rounded">▶️ Start Loop</button>
-        <button onClick={handleStop} className="px-4 py-2 bg-red-500 text-white rounded">⏹️ Stop</button>
+      <div className="flex gap-4">
+        <button
+          onClick={() => {
+            setIsLooping(true);
+            playerRef.current.seekTo(startTime);
+            playerRef.current.playVideo();
+          }}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Start Loop
+        </button>
+        <button
+          onClick={stopLoop}
+          className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+        >
+          Stop
+        </button>
+      </div>
+
+      <div className="mt-6">
+        <div id="player"></div>
+        <div className="mt-4 text-center text-xl font-semibold text-purple-700 min-h-[2em]">
+          {currentSubtitle}
+        </div>
       </div>
     </div>
   );
-};
-
-const mmssToSeconds = (mmss) => {
-  const [min, sec] = mmss.split(':').map(Number);
-  return min * 60 + sec;
-};
-
-const secondsToMMSS = (secs) => {
-  const m = Math.floor(secs / 60).toString().padStart(2, '0');
-  const s = Math.floor(secs % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
 };
 
 export default LoopLab;
