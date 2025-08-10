@@ -4,7 +4,7 @@ import './App.css'
 import ReSpeako from './components/ReSpeako'
 import ThemeToggle from './components/ThemeToggle'
 import ThemeProvider from './components/ThemeContext'
-import CatPawBtn from './components/CatpawBtn'
+import CatPawBtn from './components/CatPawBtn'
 
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import IPAPronounce from './components/IPAPronounce' 
