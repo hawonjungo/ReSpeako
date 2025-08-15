@@ -51,7 +51,7 @@ const IPAPronounce = () => {
     {
       title: "Consonants",
       value: "consonants",
-      ipa: [{ symbol: "ười", label: "lười", highlight: "ười", icon: "/assets/IPA-icons/my.png" },],
+      ipa: [{ symbol: "l", label: "lazy", highlight: "l", icon: "/assets/IPA-icons/my.png" },],
     },
 
   ];
