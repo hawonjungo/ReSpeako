@@ -5,6 +5,9 @@ import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import RotatingText from './RotatingText';
 import StarBorder from './StarBorder';
 
+import { Mic, MicOff, Play, Pause, Volume2, SearchCheck, MessageCircleX } from "lucide-react"
+
+
 const ReSpeako = () => {
   const [text, setText] = useState('');
   const [listening, setListening] = useState(false);
@@ -154,9 +157,9 @@ const ReSpeako = () => {
   };
 
   const fetchIPA = async () => {
-    if (!word.trim()) return;
+    if (!text.trim()) return;
     try {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${text}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         const phonetic = data[0]?.phonetics?.find(p => p.text)?.text || data[0]?.phonetic || 'No IPA found';
@@ -166,7 +169,7 @@ const ReSpeako = () => {
       } else {
         setIpa('');
         setDefinition('');
-        setIpaError("Can't find IPA");
+        setIpaError("Can't find IPA, should be one word.");
       }
     } catch {
       setIpa('');
@@ -174,11 +177,16 @@ const ReSpeako = () => {
       setIpaError('Error fetching IPA');
     }
   };
+  const clearText = () => {
+    setText('');
+    setIpa('');
+    finalTextRef.current = '';
+  };
 
   return (
     <div
       ref={containerRef}
-      className={`relative  pb-40 p-8 flex flex-col items-center justify-start ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-2 overflow-y-auto`}
+      className={`relative  container mx-auto px-4 py-8 space-y-8 flex flex-col items-center justify-start ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-2 overflow-y-auto`}
       style={{ paddingBottom: keyboardPadding }}
     >
       <img src="/rosaSinging.png" alt="Banner" />
@@ -198,14 +206,20 @@ const ReSpeako = () => {
 
       <p className="italic text-yellow-500 font-semibold text-sm text-center mb-6 max-w-2xl">Make Every Word Count!</p>
 
-      <div className="w-full max-w-md mb-8 mt-12">
-        <h2 className="font-semibold mb-2">🎤 Speech to Text</h2>
+      <div className="relative w-full mb-8 mt-12 max-w-4xl">
+        <div className='flex items-center justify-between '>
+          <h2 className="w-full text-center font-semibold mb-2">Speech to Text</h2>
+          {/* Clear Text Button */}
+          {text && (
+           <button onClick={clearText} className='ml-auto cursor-pointer'><MessageCircleX /></button>
+          )}
+        </div>
         <StarBorder color="cyan" speed="3s">
           <textarea
             ref={inputRef}
             value={text}
             onChange={e => setText(e.target.value)}
-            className="w-full h-24 p-3 rounded text-lg outline-none py-[16px] px-[26px]"
+            className="w-full min-h-[200px] p-3 rounded text-lg outline-none py-[16px] px-[26px]"
             placeholder="Speak Up with Confidence..."
             onFocus={() => {
               setTimeout(() => {
@@ -215,37 +229,40 @@ const ReSpeako = () => {
           />
 
         </StarBorder>
-        <div className='flex gap-4 justify-between mt-4'>
-          <button onClick={handleListen} className="p-[3px] relative">
+        <div className='flex gap-2  mt-4'>
+          <button onClick={handleListen} className="p-[3px] relative">            
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-            <div className="px-4 py-2 bg-black rounded relative text-white">{listening ? 'Listening...' : 'Start Record'}</div>
+            <div className="flex items-center gap-1 px-4 py-2 bg-black rounded relative text-white group transition duration-200 text-white hover:bg-transparent">{listening ? (
+              <>
+                <MicOff className="w-5 h-5" />
+                Stop
+              </>) : (
+              <>
+                <Mic className="w-5 h-5" />
+                Speak
+              </>)}</div>
           </button>
           <button onClick={handleSpeak} className="p-[3px] relative">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-            <div className="px-4 py-2 bg-black rounded relative text-white">Speak</div>
+            <div className="flex items-center gap-1 px-4 py-2 bg-black rounded relative text-white group transition duration-200 text-white hover:bg-transparent">
+              <>
+                <Volume2 className="w-5 h-5" />
+                Speak
+              </>
+            </div>
+          </button>
+          <button onClick={fetchIPA} className="p-[3px] relative ml-auto">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+            <div className="flex items-center gap-1 px-4 py-2 bg-black rounded relative text-white group transition duration-200 text-white hover:bg-transparent">
+              <>
+                <SearchCheck className="w-5 h-5" />
+                Check IPA
+              </></div>
           </button>
         </div>
       </div>
 
       <div className="w-full max-w-md">
-        <h2 className="font-semibold mb-2">🧾 Check IPA</h2>
-        <input
-          ref={ipaInputRef}
-          type="text"
-          value={word}
-          onChange={e => setWord(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded mb-2 text-lg"
-          placeholder="Enter a word (English)..."
-          onFocus={() => {
-            setTimeout(() => {
-              ipaInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 500);
-          }}
-        />
-        <button onClick={fetchIPA} className="p-[3px] relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-          <div className="px-8 py-2 bg-black rounded relative text-white">Check IPA</div>
-        </button>
         {ipa && (
           <div className="mt-4 text-left">
             <p className="text-lg"><strong>IPA:</strong> <span className="font-ipa text-xl">{ipa}</span></p>
