@@ -92,7 +92,7 @@ const IPAPronounce = () => {
         value={activeTab}
         onChange={setActiveTab}
         id="custom-animation"
-        className={`w-auto ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-black'}`}
+        className={`mx-auto ${darkMode ? 'bg-transparent text-white' : 'bg-transparent text-black'}`}
       >
         <TabsHeader indicatorProps={{
           className: `${darkMode ? 'bg-gradient-to-r from-indigo-500 to-purple-500' : 'bg-indigo-200/80'} z-0`,
@@ -117,7 +117,7 @@ const IPAPronounce = () => {
         >
           {data.map(({ title, value, ipa }) => (
             <TabPanel key={value} value={value}>
-              <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-2 p-2 w-max mx-auto">
+              <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 p-2 w-max mx-auto">
                 {ipa.map((char, idx) => {
                   const { label, highlight } = char;
                   const parts = label.split(highlight);
