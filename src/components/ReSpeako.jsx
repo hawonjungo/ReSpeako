@@ -242,8 +242,8 @@ const ReSpeako = () => {
                 Speak
               </>)}</div>
           </button>
-          <button onClick={handleSpeak} className="p-[3px] relative">
-            <div className="p-[1px] bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+          <button onClick={handleSpeak} className="p-[3px] relative rounded-lg">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
             <div className="flex items-center gap-1 px-4 py-2 bg-black rounded relative text-white group transition duration-200 text-white hover:bg-transparent">
               <>
                 <Volume2 className="w-5 h-5" />
