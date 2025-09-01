@@ -256,7 +256,7 @@ const ReSpeako = () => {
             <div className="flex items-center gap-1 px-4 py-2 bg-black rounded relative text-white group transition duration-200 text-white hover:bg-transparent">
               <>
                 <SearchCheck className="w-5 h-5" />
-                Check IPA
+                IPA
               </></div>
           </button>
         </div>
