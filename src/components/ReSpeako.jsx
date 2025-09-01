@@ -206,7 +206,7 @@ const ReSpeako = () => {
 
       <p className="italic text-yellow-500 font-semibold text-sm text-center mb-6 max-w-2xl">Make Every Word Count!</p>
 
-      <div className="relative w-full mb-8 mt-12 max-w-4xl">
+      <div className="relative w-full mb-8 mt-8 max-w-4xl">
         <div className='flex items-center justify-between '>
           <h2 className="w-full text-center font-semibold mb-2">Speech to Text</h2>
           {/* Clear Text Button */}

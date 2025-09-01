@@ -39,9 +39,7 @@ function App() {
             <Route path="/ipa-pronounce" element={<IPAPronounce />} />
             <Route path="/loop-lab" element={<LoopLab />} />
           </Routes>
-          <div className='sticky bottom-20 left-0 right-0 z-10'>
-            <CatPawBtn />
-          </div>
+          <CatPawBtn />
         </div>
       </HashRouter>
     </ThemeProvider>
