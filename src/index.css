@@ -26,6 +26,11 @@ body {
 .keyboard-open {
   padding-bottom: 300px; 
 }
+
+.gooey {
+  filter: url("#gooey");
+}
+
 @keyframes star-movement-bottom {
   0% {
     transform: translateX(0%);

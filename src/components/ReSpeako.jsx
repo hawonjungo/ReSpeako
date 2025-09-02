@@ -6,6 +6,7 @@ import RotatingText from './RotatingText';
 import StarBorder from './StarBorder';
 
 import { Mic, MicOff, Play, Pause, Volume2, SearchCheck, MessageCircleX } from "lucide-react"
+import GooeyNav from './GooeyNav';
 
 
 const ReSpeako = () => {
@@ -183,12 +184,20 @@ const ReSpeako = () => {
     finalTextRef.current = '';
   };
 
+
+  const items = [
+    { label: "Home", href: "#" },
+    { label: "Learning", href: "#" },
+    { label: "Practicing", href: "#" },
+  ]
+
   return (
     <div
       ref={containerRef}
-      className={`relative  container mx-auto px-4 py-8 space-y-8 flex flex-col items-center justify-start ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-2 overflow-y-auto`}
+      className={`relative  container mx-auto px-4 py-8 space-y-8 flex flex-col items-center justify-start ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-4 overflow-y-auto`}
       style={{ paddingBottom: keyboardPadding }}
     >
+       <GooeyNav items={items} />
       <img src="/rosaSinging.png" alt="Banner" />
       <h1 className="md:text-6xl text-4xl font-bold mb-2 text-center flex">🎙️ Re
         <RotatingText

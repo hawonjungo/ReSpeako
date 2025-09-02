@@ -31,7 +31,7 @@ function App() {
     <ThemeProvider>
       <HashRouter>
         <div className="flex flex-col min-h-screen relative">
-          <div className='absolute right-8 top-8 z-10'>
+          <div className='absolute right-4 top-16 z-10'>
             <ThemeToggle />
           </div>
           <Routes>
