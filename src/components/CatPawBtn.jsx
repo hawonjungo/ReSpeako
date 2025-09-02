@@ -91,18 +91,18 @@ const CatPawBtn = () => {
   };
 
   return (
-    <div ref={parentRef} className="absolute inset-0">
+    <div ref={parentRef} className="absolute inset-0 pointer-events-none">
       {/* Overlay blur chỉ phủ container cha */}
       {isOpen && (
         <div
-          className="absolute inset-0 z-[99] backdrop-blur-md bg-white/30 transition-all"
-          style={{ pointerEvents: 'auto' }}
+          className="absolute inset-0 z-[99] backdrop-blur-md bg-white/30 transition-all pointer-events-auto"
+          onClick={toggle}
         />
       )}
 
       {/* CatPawBtn và các nút con luôn rõ nét, z-index cao hơn */}
       <div
-        className="absolute z-[100] flex items-center justify-center"
+        className="absolute z-[100] flex items-center justify-center pointer-events-auto"
         style={{
           right: 20,
           top: posY,
