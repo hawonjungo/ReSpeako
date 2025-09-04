@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import {Home } from "lucide-react"
 const CatPawBtn = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [posY, setPosY] = useState(0);
@@ -115,7 +115,7 @@ const CatPawBtn = () => {
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onClick={toggle}
-          className="w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg cursor-move"
+          className="w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg cursor-move justify-items-center bg-gradient-to-r from-indigo-500 to-purple-500"
           style={{
             transform: isOpen ? `scale(1.2)` : '',
             zIndex: 101,
@@ -123,7 +123,7 @@ const CatPawBtn = () => {
             transition: 'transform 0.3s cubic-bezier(.4,2,.3,1)',
           }}
         >
-          +
+          <Home className="w-5 h-5" />
         </button>
 
         {/* Child Buttons với animation */}

@@ -9,6 +9,7 @@ import CatPawBtn from './components/CatPawBtn'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import IPAPronounce from './components/IPAPronounce' 
 import LoopLab from './components/LoopLab'
+import Learning from './components/Learning'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -31,13 +32,14 @@ function App() {
     <ThemeProvider>
       <HashRouter>
         <div className="flex flex-col min-h-screen relative">
-          <div className='absolute right-4 top-16 z-10'>
+          <div className='absolute right-4 top-20 z-10'>
             <ThemeToggle />
           </div>
           <Routes>
             <Route path="/" element={<ReSpeako />} />
             <Route path="/ipa-pronounce" element={<IPAPronounce />} />
             <Route path="/loop-lab" element={<LoopLab />} />
+            <Route path="/learning" element={<Learning />} />
           </Routes>
           <CatPawBtn />
         </div>

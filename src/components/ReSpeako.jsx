@@ -187,7 +187,7 @@ const ReSpeako = () => {
 
   const items = [
     { label: "Home", href: "#" },
-    { label: "Learning", href: "#" },
+    { label: "Learning", href: "/learning" },
     { label: "Practicing", href: "#" },
   ]
 
