@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from './ThemeContext';
+import Header from "./layouts/Header";
 
 const learningTopics = [
   {
@@ -73,10 +74,6 @@ export default function Learning() {
       className={`relative min-h-screen pb-20 px-4 flex flex-col items-center justify-start
         ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} transition-colors`}
     >
-      <img src="/rosaSinging.png" alt="Banner" className="w-32 h-32 mt-8 mb-4" />
-      <h1 className="md:text-5xl text-3xl font-bold mb-2 text-center flex items-center gap-2">
-        📚 Learning
-      </h1>
       <p className="italic text-yellow-500 font-semibold text-sm text-center mb-6 max-w-2xl">
         Unlock your English potential with interactive lessons!
       </p>

@@ -6,13 +6,11 @@ import RotatingText from './RotatingText';
 import StarBorder from './StarBorder';
 
 import { Mic, MicOff, Play, Pause, Volume2, SearchCheck, MessageCircleX } from "lucide-react"
-import GooeyNav from './GooeyNav';
 
 
 const ReSpeako = () => {
   const [text, setText] = useState('');
   const [listening, setListening] = useState(false);
-  const [word, setWord] = useState('');
   const [ipa, setIpa] = useState('');
   const [definition, setDefinition] = useState('');
   const [ipaError, setIpaError] = useState('');
@@ -21,7 +19,6 @@ const ReSpeako = () => {
   const userStoppedRef = useRef(false);
   const containerRef = useRef(null);
   const inputRef = useRef(null);
-  const ipaInputRef = useRef(null); // 👈 ref mới cho input IPA
   const [keyboardPadding, setKeyboardPadding] = useState(0);
   const { darkMode } = useContext(ThemeContext);
 
@@ -197,24 +194,6 @@ const ReSpeako = () => {
       className={`relative  container mx-auto px-4 py-8 space-y-8 flex flex-col items-center justify-start ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-4 overflow-y-auto`}
       style={{ paddingBottom: keyboardPadding }}
     >
-       <GooeyNav items={items} />
-      <img src="/rosaSinging.png" alt="Banner" />
-      <h1 className="md:text-6xl text-4xl font-bold mb-2 text-center flex">🎙️ Re
-        <RotatingText
-          texts={['Speako', 'Listeno', 'Pronuno']}
-          mainClassName="px-2 md:px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded relative group transition text-white"
-          staggerFrom="last"
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "-120%" }}
-          splitLevelClassName="overflow-hidden pb-1"
-          transition={{ type: "spring", damping: 30, stiffness: 400 }}
-          rotationInterval={5000}
-        />
-      </h1>
-
-      <p className="italic text-yellow-500 font-semibold text-sm text-center mb-6 max-w-2xl">Make Every Word Count!</p>
-
       <div className="relative w-full mb-8 mt-8 max-w-4xl">
         <div className='flex items-center justify-between '>
           <h2 className="w-full text-center font-semibold mb-2">Speech to Text</h2>

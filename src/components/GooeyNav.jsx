@@ -268,11 +268,11 @@ const GooeyNav = ({
           }
         `}
       </style>
-      <div className="relative" ref={containerRef}>
+      <div className="relative bg-gradient-to-r from-indigo-500 to-purple-500 rounded p-1" ref={containerRef}>
         <nav className="flex relative" style={{ transform: 'translate3d(0,0,0.01px)' }}>
           <ul
             ref={navRef}
-            className="flex gap-8 list-none p-0 px-4 m-0 relative z-[3]"
+            className="flex gap-8 list-none p-0 px-2 py-2 m-0 relative z-[3]"
             style={{
               color: 'white',
               textShadow: '0 1px 1px hsl(205deg 30% 10% / 0.2)'
@@ -288,7 +288,7 @@ const GooeyNav = ({
                   to={item.href}
                   onClick={e => handleClick(e, index)}
                   onKeyDown={e => handleKeyDown(e, index)}
-                  className="outline-none py-[0.6em] px-[1em] inline-block"
+                  className="outline-none py-[0.3em] px-[0.8em] inline-block"
                 >
                   {item.label}
                 </Link>

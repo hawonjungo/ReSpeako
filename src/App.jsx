@@ -5,11 +5,13 @@ import ReSpeako from './components/ReSpeako'
 import ThemeToggle from './components/ThemeToggle'
 import ThemeProvider from './components/ThemeContext'
 import CatPawBtn from './components/CatPawBtn'
+import Header from './components/layouts/Header'
 
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import IPAPronounce from './components/IPAPronounce' 
 import LoopLab from './components/LoopLab'
 import Learning from './components/Learning'
+import WordFormation from './components/WordFormation'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -32,7 +34,8 @@ function App() {
     <ThemeProvider>
       <HashRouter>
         <div className="flex flex-col min-h-screen relative">
-          <div className='absolute right-4 top-20 z-10'>
+          <Header />
+          <div className='absolute right-4 top-24 z-10'>
             <ThemeToggle />
           </div>
           <Routes>
@@ -40,6 +43,7 @@ function App() {
             <Route path="/ipa-pronounce" element={<IPAPronounce />} />
             <Route path="/loop-lab" element={<LoopLab />} />
             <Route path="/learning" element={<Learning />} />
+            <Route path="/word-formation" element={<WordFormation />} />
           </Routes>
           <CatPawBtn />
         </div>

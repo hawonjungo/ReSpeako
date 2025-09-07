@@ -115,7 +115,7 @@ const CatPawBtn = () => {
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onClick={toggle}
-          className="w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg cursor-move justify-items-center bg-gradient-to-r from-indigo-500 to-purple-500"
+          className="flex w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg cursor-move items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-500"
           style={{
             transform: isOpen ? `scale(1.2)` : '',
             zIndex: 101,
