@@ -7,6 +7,7 @@ ReSpeako is a versatile language tool application built with React and Capacitor
   <img src="https://github.com/user-attachments/assets/948c7a7c-60ec-4cdf-8a5c-4457aa8ed962" alt="main" />
   <img src="https://github.com/user-attachments/assets/88defbf5-8286-43aa-b323-f589ba262ff5" alt="ipa" />
 
+![ReSpeako](https://github.com/user-attachments/assets/e6a568d9-ac1f-4bc7-ada5-cc37e73f97f3)
 
 </p>
 
