@@ -8,7 +8,7 @@ import CatPawBtn from './components/CatPawBtn'
 import Header from './components/layouts/Header'
 
 import { HashRouter, Routes, Route } from 'react-router-dom'
-import IPAPronounce from './components/IPAPronounce' 
+import IPAPronounce from './components/IPAPronounce'
 import LoopLab from './components/LoopLab'
 import Learning from './components/Learning'
 import WordFormation from './components/WordFormation'
@@ -43,7 +43,7 @@ function App() {
             <Route path="/ipa-pronounce" element={<IPAPronounce />} />
             <Route path="/loop-lab" element={<LoopLab />} />
             <Route path="/learning" element={<Learning />} />
-            <Route path="/word-formation" element={<WordFormation />} />
+            <Route path="/learning/word-formation" element={<WordFormation />} />
           </Routes>
           <CatPawBtn />
         </div>

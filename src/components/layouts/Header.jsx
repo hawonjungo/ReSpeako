@@ -20,6 +20,17 @@ const Header = () => {
         };
         return iconMap[pathname] || '🎙️'; // Default to microphone icon
     };
+    // sologan mapping for different pages
+    const getPageSologan = (pathname) => {
+        const sologanMap = {
+            '/': 'Make Every Word Count!',
+            '/learning': ' Unlock your English potential with interactive lessons!',
+            '/ipa-pronounce': 'Speak clearly with the power of phonetics',
+            '/loop-lab': 'Practice makes perfect',
+            '/word-formation': ' Master the art of creating new words from existing ones'
+        };
+        return sologanMap[pathname] || 'Make Every Word Count!';
+    };
 
     const items = [
         { label: "Home", href: "/" },
@@ -47,7 +58,7 @@ const Header = () => {
                     rotationInterval={5000}
                 />
             </h1>
-            <p className="w-full italic text-yellow-500 font-semibold text-sm text-center max-w-2xl">Make Every Word Count!</p>
+            <p className="w-full italic text-yellow-500 font-semibold text-sm text-center max-w-2xl">{getPageSologan(location.pathname)}</p>
         </header>
     );
 };

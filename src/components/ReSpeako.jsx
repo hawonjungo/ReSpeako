@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import { ThemeContext } from './ThemeContext';
 import { Capacitor } from '@capacitor/core';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
-import RotatingText from './RotatingText';
 import StarBorder from './StarBorder';
 
 import { Mic, MicOff, Play, Pause, Volume2, SearchCheck, MessageCircleX } from "lucide-react"
