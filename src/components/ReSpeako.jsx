@@ -2,24 +2,38 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import { ThemeContext } from './ThemeContext';
 import { Capacitor } from '@capacitor/core';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
-import StarBorder from './StarBorder';
-
-import { Mic, MicOff, Play, Pause, Volume2, SearchCheck, MessageCircleX } from "lucide-react"
+import PageContainer from './ui/PageContainer';
+import SectionCard from './ui/SectionCard';
+import InputPanel from './respeako/InputPanel';
+import ActionBar from './respeako/ActionBar';
+import FeedbackPanel from './respeako/FeedbackPanel';
+import useTextToSpeech from '../hooks/useTextToSpeech';
 
 
 const ReSpeako = () => {
+  // input state
   const [text, setText] = useState('');
-  const [listening, setListening] = useState(false);
-  const [ipa, setIpa] = useState('');
-  const [definition, setDefinition] = useState('');
-  const [ipaError, setIpaError] = useState('');
+
+  // speech recognition state
+  const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const finalTextRef = useRef('');
   const userStoppedRef = useRef(false);
+
+  // ipa result state
+  const [ipa, setIpa] = useState('');
+  const [definition, setDefinition] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // ui state
   const containerRef = useRef(null);
   const inputRef = useRef(null);
   const [keyboardPadding, setKeyboardPadding] = useState(0);
   const { darkMode } = useContext(ThemeContext);
+  const hasText = Boolean(text.trim());
+  const transcript = text;
+
+  const { speak } = useTextToSpeech();
 
   useEffect(() => {
     const setupRecognition = async () => {
@@ -35,9 +49,9 @@ const ReSpeako = () => {
 
         recognitionRef.current = {
           start: async () => {
-            if (listening) return;
+            if (isListening) return;
             userStoppedRef.current = false;
-            setListening(true);
+            setIsListening(true);
             try {
               const result = await SpeechRecognition.start({
                 language: 'en-US',
@@ -46,22 +60,22 @@ const ReSpeako = () => {
               });
               setText(result.matches?.[0] || '');
               setTimeout(() => {
-                if (listening && !userStoppedRef.current) recognitionRef.current.start();
+                if (isListening && !userStoppedRef.current) recognitionRef.current.start();
               }, 300);
             } catch (error) {
-              if (!userStoppedRef.current && listening) {
+              if (!userStoppedRef.current && isListening) {
                 setTimeout(() => {
-                  if (listening && !userStoppedRef.current) recognitionRef.current.start();
+                  if (isListening && !userStoppedRef.current) recognitionRef.current.start();
                 }, 500);
               }
             } finally {
-              setListening(false);
+              setIsListening(false);
             }
           },
           stop: async () => {
             userStoppedRef.current = true;
             await SpeechRecognition.stop();
-            setListening(false);
+            setIsListening(false);
           }
         };
 
@@ -88,7 +102,7 @@ const ReSpeako = () => {
       } else {
         const WebSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!WebSpeechRecognition) {
-          alert('Your browser does not support Speech Recognition');
+          setErrorMessage('Speech recognition is not supported in this browser.');
           return;
         }
 
@@ -98,7 +112,7 @@ const ReSpeako = () => {
         recognition.continuous = true;
         finalTextRef.current = '';
 
-        recognition.onstart = () => setListening(true);
+        recognition.onstart = () => setIsListening(true);
 
         recognition.onresult = (event) => {
           let interimTranscript = '';
@@ -113,8 +127,8 @@ const ReSpeako = () => {
           setText((finalTextRef.current + interimTranscript).trim());
         };
 
-        recognition.onerror = () => setListening(false);
-        recognition.onend = () => setListening(false);
+        recognition.onerror = () => setIsListening(false);
+        recognition.onend = () => setIsListening(false);
 
         recognitionRef.current = recognition;
       }
@@ -125,31 +139,24 @@ const ReSpeako = () => {
 
   const handleListen = () => {
     if (!recognitionRef.current) {
-      alert('Speech Recognition not ready.');
+      setErrorMessage('Speech recognition is not ready yet.');
       return;
     }
-    if (listening) {
+    if (isListening) {
       recognitionRef.current.stop?.();
     } else {
       if (Capacitor.getPlatform() === 'web') finalTextRef.current = '';
+      setErrorMessage('');
       setText('');
       recognitionRef.current.start?.();
     }
   };
 
   const handleSpeak = async () => {
-    if (!text.trim()) return;
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const { TextToSpeech } = await import('@capacitor-community/text-to-speech');
-        await TextToSpeech.speak({ text, lang: 'en-US', rate: 1.0, pitch: 1.0, volume: 1.0 });
-      } catch (err) {
-        alert('Text to Speech failed.');
-      }
-    } else {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
+    try {
+      await speak(text);
+    } catch (err) {
+      setErrorMessage(err.message || 'Text to speech failed.');
     }
   };
 
@@ -162,103 +169,68 @@ const ReSpeako = () => {
         const phonetic = data[0]?.phonetics?.find(p => p.text)?.text || data[0]?.phonetic || 'No IPA found';
         setIpa(phonetic);
         setDefinition(data[0]?.meanings[0]?.definitions[0]?.definition || '');
-        setIpaError('');
+        setErrorMessage('');
       } else {
         setIpa('');
         setDefinition('');
-        setIpaError("Can't find IPA, should be one word.");
+        setErrorMessage("Can't find IPA, should be one word.");
       }
     } catch {
       setIpa('');
       setDefinition('');
-      setIpaError('Error fetching IPA');
+      setErrorMessage('Error fetching IPA');
     }
   };
   const clearText = () => {
     setText('');
     setIpa('');
+    setDefinition('');
+    setErrorMessage('');
     finalTextRef.current = '';
   };
 
-
-  const items = [
-    { label: "Home", href: "#" },
-    { label: "Learning", href: "/learning" },
-    { label: "Practicing", href: "#" },
-  ]
-
   return (
-    <div
-      ref={containerRef}
-      className={`relative  container mx-auto px-4 py-8 space-y-8 flex flex-col items-center justify-start ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px] pt-4 overflow-y-auto`}
-      style={{ paddingBottom: keyboardPadding }}
+    <PageContainer
+      title="Practice"
+      description="Speak, type, and review pronunciation in one place."
     >
-      <div className="relative w-full mb-8 mt-8 max-w-4xl">
-        <div className='flex items-center justify-between '>
-          <h2 className="w-full text-center font-semibold mb-2">Speech to Text</h2>
-          {/* Clear Text Button */}
-          {text && (
-           <button onClick={clearText} className='ml-auto cursor-pointer'><MessageCircleX /></button>
-          )}
-        </div>
-        <StarBorder color="cyan" speed="3s">
-          <textarea
-            ref={inputRef}
-            value={text}
-            onChange={e => setText(e.target.value)}
-            className="w-full min-h-[200px] p-3 rounded text-lg outline-none py-[16px] px-[26px]"
-            placeholder="Speak Up with Confidence..."
-            onFocus={() => {
-              setTimeout(() => {
-                inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 500);
-            }}
-          />
+      <div
+        ref={containerRef}
+        className={`relative overflow-y-auto ${darkMode ? 'text-white' : 'text-black'}`}
+        style={{ paddingBottom: keyboardPadding }}
+      >
+        <div className="mx-auto max-w-4xl space-y-4">
+          <SectionCard>
+            <InputPanel
+              transcript={transcript}
+              inputRef={inputRef}
+              onTranscriptChange={setText}
+              onClear={clearText}
+            />
+          </SectionCard>
 
-        </StarBorder>
-        <div className='flex gap-2  mt-4'>
-          <button onClick={handleListen} className="p-[3px] relative">            
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-            <div className="flex items-center gap-1 px-4 py-2 bg-black rounded relative text-white group transition duration-200 text-white hover:bg-transparent">{listening ? (
-              <>
-                <MicOff className="w-5 h-5" />
-                Stop
-              </>) : (
-              <>
-                <Mic className="w-5 h-5" />
-                Speak
-              </>)}</div>
-          </button>
-          <button onClick={handleSpeak} className="p-[3px] relative rounded-lg">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-            <div className="flex items-center gap-1 px-4 py-2 bg-black rounded relative text-white group transition duration-200 text-white hover:bg-transparent">
-              <>
-                <Volume2 className="w-5 h-5" />
-                Speak
-              </>
-            </div>
-          </button>
-          <button onClick={fetchIPA} className="p-[3px] relative ml-auto">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-            <div className="flex items-center gap-1 px-4 py-2 bg-black rounded relative text-white group transition duration-200 text-white hover:bg-transparent">
-              <>
-                <SearchCheck className="w-5 h-5" />
-                IPA
-              </></div>
-          </button>
+          <SectionCard>
+            <ActionBar
+              isListening={isListening}
+              hasText={hasText}
+              onListen={handleListen}
+              onSpeak={handleSpeak}
+              onCheckIpa={fetchIPA}
+            />
+          </SectionCard>
+
+          <SectionCard>
+            <FeedbackPanel
+              transcript={transcript}
+              ipa={ipa}
+              definition={definition}
+              errorMessage={errorMessage}
+            />
+          </SectionCard>
         </div>
       </div>
+    </PageContainer>
 
-      <div className="w-full max-w-md">
-        {ipa && (
-          <div className="mt-4 text-left">
-            <p className="text-lg"><strong>IPA:</strong> <span className="font-ipa text-xl">{ipa}</span></p>
-            {definition && <p className="text-gray-700 mt-1"><strong>Meaning:</strong> {definition}</p>}
-          </div>
-        )}
-        {ipaError && <p className="text-red-600 mt-2">{ipaError}</p>}
-      </div>
-    </div>
   );
 };
 
