@@ -8,6 +8,7 @@ import InputPanel from './respeako/InputPanel';
 import ActionBar from './respeako/ActionBar';
 import FeedbackPanel from './respeako/FeedbackPanel';
 import useTextToSpeech from '../hooks/useTextToSpeech';
+import useDictionaryIpa from '../hooks/useDictionaryIpa';
 
 
 const ReSpeako = () => {
@@ -34,7 +35,7 @@ const ReSpeako = () => {
   const transcript = text;
 
   const { speak } = useTextToSpeech();
-
+  const { fetchIpa } = useDictionaryIpa();
   useEffect(() => {
     const setupRecognition = async () => {
       if (Capacitor.isNativePlatform()) {
@@ -160,25 +161,18 @@ const ReSpeako = () => {
     }
   };
 
-  const fetchIPA = async () => {
+  const handleCheckIpa = async () => {
     if (!text.trim()) return;
+
     try {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${text}`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        const phonetic = data[0]?.phonetics?.find(p => p.text)?.text || data[0]?.phonetic || 'No IPA found';
-        setIpa(phonetic);
-        setDefinition(data[0]?.meanings[0]?.definitions[0]?.definition || '');
-        setErrorMessage('');
-      } else {
-        setIpa('');
-        setDefinition('');
-        setErrorMessage("Can't find IPA, should be one word.");
-      }
-    } catch {
+      const result = await fetchIpa(text);
+      setIpa(result.ipa);
+      setDefinition(result.definition);
+      setErrorMessage('');
+    } catch (err) {
       setIpa('');
       setDefinition('');
-      setErrorMessage('Error fetching IPA');
+      setErrorMessage(err.message || 'Error fetching IPA.');
     }
   };
   const clearText = () => {
@@ -215,7 +209,7 @@ const ReSpeako = () => {
               hasText={hasText}
               onListen={handleListen}
               onSpeak={handleSpeak}
-              onCheckIpa={fetchIPA}
+              onCheckIpa={handleCheckIpa}
             />
           </SectionCard>
 
