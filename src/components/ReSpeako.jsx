@@ -1,30 +1,49 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { ThemeContext } from './ThemeContext';
 import { Capacitor } from '@capacitor/core';
-import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
 import InputPanel from './respeako/InputPanel';
 import ActionBar from './respeako/ActionBar';
 import FeedbackPanel from './respeako/FeedbackPanel';
+
 import useTextToSpeech from '../hooks/useTextToSpeech';
 import useDictionaryIpa from '../hooks/useDictionaryIpa';
+import useReSpeakoActions from '../hooks/useReSpeakoActions';
+import useSpeechRecognition from '../hooks/useSpeechRecognition';
 
+const initialFeedback = {
+  status: 'idle',
+  transcript: '',
+  ipa: '',
+  definition: '',
+  message: '',
+  source: '',
+};
 
 const ReSpeako = () => {
   // input state
   const [text, setText] = useState('');
+  const [feedback, setFeedback] = useState(initialFeedback);
+
+  const handleTranscriptChange = (nextTranscript, source = 'input') => {
+    setText(nextTranscript);
+    setFeedback({
+      ...initialFeedback,
+      transcript: nextTranscript,
+      source,
+    });
+  };
 
   // speech recognition state
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef(null);
-  const finalTextRef = useRef('');
-  const userStoppedRef = useRef(false);
-
-  // ipa result state
-  const [ipa, setIpa] = useState('');
-  const [definition, setDefinition] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const {
+    isListening,
+    speechError,
+    toggleListening,
+    resetTranscriptBuffer,
+  } = useSpeechRecognition({
+    onTranscriptChange: (nextTranscript) => handleTranscriptChange(nextTranscript, 'speech'),
+  });
 
   // ui state
   const containerRef = useRef(null);
@@ -36,152 +55,61 @@ const ReSpeako = () => {
 
   const { speak } = useTextToSpeech();
   const { fetchIpa } = useDictionaryIpa();
+  const {
+    handleListen,
+    handleSpeak,
+    handleCheckIpa,
+    clearText,
+    setErrorFeedback,
+  } = useReSpeakoActions({
+    text,
+    setText,
+    setFeedback,
+    initialFeedback,
+    toggleListening,
+    resetTranscriptBuffer,
+    speak,
+    fetchIpa,
+  });
+
   useEffect(() => {
-    const setupRecognition = async () => {
-      if (Capacitor.isNativePlatform()) {
-        try {
-          const hasPermission = await SpeechRecognition.hasPermission();
-          if (!hasPermission.granted) {
-            await SpeechRecognition.requestPermission();
+    if (!Capacitor.isNativePlatform()) return undefined;
+
+    let showListener;
+    let hideListener;
+
+    import('@capacitor/keyboard').then(({ Keyboard }) => {
+      showListener = Keyboard.addListener('keyboardDidShow', (info) => {
+        const keyboardHeight = info.keyboardHeight || 300;
+        setKeyboardPadding(keyboardHeight + 40);
+        setTimeout(() => {
+          const active = document.activeElement;
+          if (
+            active &&
+            (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') &&
+            typeof active.scrollIntoView === 'function'
+          ) {
+            active.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-        } catch (err) {
-          console.warn('Permission error:', err);
-        }
+        }, 400);
+      });
 
-        recognitionRef.current = {
-          start: async () => {
-            if (isListening) return;
-            userStoppedRef.current = false;
-            setIsListening(true);
-            try {
-              const result = await SpeechRecognition.start({
-                language: 'en-US',
-                popup: false,
-                partialResults: false,
-              });
-              setText(result.matches?.[0] || '');
-              setTimeout(() => {
-                if (isListening && !userStoppedRef.current) recognitionRef.current.start();
-              }, 300);
-            } catch (error) {
-              if (!userStoppedRef.current && isListening) {
-                setTimeout(() => {
-                  if (isListening && !userStoppedRef.current) recognitionRef.current.start();
-                }, 500);
-              }
-            } finally {
-              setIsListening(false);
-            }
-          },
-          stop: async () => {
-            userStoppedRef.current = true;
-            await SpeechRecognition.stop();
-            setIsListening(false);
-          }
-        };
+      hideListener = Keyboard.addListener('keyboardDidHide', () => {
+        setKeyboardPadding(0);
+      });
+    });
 
-        import('@capacitor/keyboard').then(({ Keyboard }) => {
-          Keyboard.addListener('keyboardDidShow', (info) => {
-            const keyboardHeight = info.keyboardHeight || 300;
-            setKeyboardPadding(keyboardHeight + 40);
-            setTimeout(() => {
-              const active = document.activeElement;
-              if (
-                active &&
-                (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') &&
-                typeof active.scrollIntoView === 'function'
-              ) {
-                active.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            }, 400);
-          });
-
-          Keyboard.addListener('keyboardDidHide', () => {
-            setKeyboardPadding(0);
-          });
-        });
-      } else {
-        const WebSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!WebSpeechRecognition) {
-          setErrorMessage('Speech recognition is not supported in this browser.');
-          return;
-        }
-
-        const recognition = new WebSpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = true;
-        recognition.continuous = true;
-        finalTextRef.current = '';
-
-        recognition.onstart = () => setIsListening(true);
-
-        recognition.onresult = (event) => {
-          let interimTranscript = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-              finalTextRef.current += transcript + ' ';
-            } else {
-              interimTranscript += transcript;
-            }
-          }
-          setText((finalTextRef.current + interimTranscript).trim());
-        };
-
-        recognition.onerror = () => setIsListening(false);
-        recognition.onend = () => setIsListening(false);
-
-        recognitionRef.current = recognition;
-      }
+    return () => {
+      showListener?.then?.((listener) => listener.remove());
+      hideListener?.then?.((listener) => listener.remove());
     };
-
-    setupRecognition();
   }, []);
 
-  const handleListen = () => {
-    if (!recognitionRef.current) {
-      setErrorMessage('Speech recognition is not ready yet.');
-      return;
+  useEffect(() => {
+    if (speechError) {
+      setErrorFeedback(speechError, text, 'speech');
     }
-    if (isListening) {
-      recognitionRef.current.stop?.();
-    } else {
-      if (Capacitor.getPlatform() === 'web') finalTextRef.current = '';
-      setErrorMessage('');
-      setText('');
-      recognitionRef.current.start?.();
-    }
-  };
-
-  const handleSpeak = async () => {
-    try {
-      await speak(text);
-    } catch (err) {
-      setErrorMessage(err.message || 'Text to speech failed.');
-    }
-  };
-
-  const handleCheckIpa = async () => {
-    if (!text.trim()) return;
-
-    try {
-      const result = await fetchIpa(text);
-      setIpa(result.ipa);
-      setDefinition(result.definition);
-      setErrorMessage('');
-    } catch (err) {
-      setIpa('');
-      setDefinition('');
-      setErrorMessage(err.message || 'Error fetching IPA.');
-    }
-  };
-  const clearText = () => {
-    setText('');
-    setIpa('');
-    setDefinition('');
-    setErrorMessage('');
-    finalTextRef.current = '';
-  };
+  }, [setErrorFeedback, speechError, text]);
 
   return (
     <PageContainer
@@ -198,7 +126,7 @@ const ReSpeako = () => {
             <InputPanel
               transcript={transcript}
               inputRef={inputRef}
-              onTranscriptChange={setText}
+              onTranscriptChange={handleTranscriptChange}
               onClear={clearText}
             />
           </SectionCard>
@@ -214,12 +142,7 @@ const ReSpeako = () => {
           </SectionCard>
 
           <SectionCard>
-            <FeedbackPanel
-              transcript={transcript}
-              ipa={ipa}
-              definition={definition}
-              errorMessage={errorMessage}
-            />
+            <FeedbackPanel feedback={feedback} />
           </SectionCard>
         </div>
       </div>

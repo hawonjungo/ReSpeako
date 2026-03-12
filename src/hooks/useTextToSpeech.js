@@ -14,14 +14,23 @@ export default function useTextToSpeech() {
           pitch: 1.0,
           volume: 1.0,
         });
-      } catch (err) {
+        return;
+      } catch {
         throw new Error('Text to speech failed.');
       }
-    } else {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
     }
+
+    if (
+      typeof window === 'undefined' ||
+      typeof window.speechSynthesis === 'undefined' ||
+      typeof window.SpeechSynthesisUtterance === 'undefined'
+    ) {
+      throw new Error('Text to speech failed.');
+    }
+
+    const utterance = new window.SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
   };
 
   return { speak };

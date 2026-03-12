@@ -1,7 +1,15 @@
 import EmptyState from '../ui/EmptyState';
 import StatusBanner from '../ui/StatusBanner';
 
-export default function FeedbackPanel({ transcript, ipa, definition, errorMessage }) {
+export default function FeedbackPanel({ feedback }) {
+  const {
+    status,
+    transcript,
+    ipa,
+    definition,
+    message,
+  } = feedback;
+
   return (
     <div className="w-full text-left">
       <div className="mb-3">
@@ -11,14 +19,22 @@ export default function FeedbackPanel({ transcript, ipa, definition, errorMessag
         </p>
       </div>
 
-      {!transcript && !ipa && !definition && !errorMessage && (
+      {status === 'idle' && !transcript && (
         <EmptyState
           title="No results yet"
           description="Type a word or start speaking to see pronunciation feedback."
         />
       )}
 
-      {ipa && (
+      {status === 'loading' && (
+        <StatusBanner type="info" message={message || 'Checking pronunciation...'} />
+      )}
+
+      {status === 'error' && (
+        <StatusBanner type="error" message={message} />
+      )}
+
+      {status === 'success' && ipa && (
         <>
           <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-black/30">
             <p className="text-lg">
@@ -36,10 +52,6 @@ export default function FeedbackPanel({ transcript, ipa, definition, errorMessag
           </div>
         </>
       )}
-
-      <div className="mt-4">
-        <StatusBanner type="error" message={errorMessage} />
-      </div>
     </div>
   );
 }

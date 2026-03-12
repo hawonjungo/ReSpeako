@@ -9,6 +9,10 @@ export default function useDictionaryIpa() {
         `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(text)}`
       );
 
+      if (!res.ok) {
+        throw new Error("Can't find IPA, should be one word.");
+      }
+
       const data = await res.json();
 
       if (!Array.isArray(data)) {
@@ -28,7 +32,7 @@ export default function useDictionaryIpa() {
         definition,
       };
     } catch (error) {
-      if (error.message) {
+      if (error instanceof Error) {
         throw error;
       }
 
