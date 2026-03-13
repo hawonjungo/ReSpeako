@@ -1,6 +1,6 @@
 # ReSpeako
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/hawonjungo/ReSpeako)
-
+https://respeako.relifes.net/
+#
 ReSpeako is a versatile language tool application built with React and Capacitor. It empowers users with speech-to-text, text-to-speech, and an IPA (International Phonetic Alphabet) lookup feature, aiming to assist with language learning and pronunciation. The application is designed to be cross-platform, with the current configuration targeting Android.
 
 <p align="center">
