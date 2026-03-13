@@ -1,442 +1,613 @@
-import React, { useContext, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { BookOpen, Lightbulb, Target, Brain, CheckCircle, FileText } from "lucide-react";
-import { ThemeContext } from "./ThemeContext";
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import QuizQuestionCard from './wordFormationQuiz/QuizQuestionCard';
+import QuizResultCard from './wordFormationQuiz/QuizResultCard';
+import QuizTopicCard from './wordFormationQuiz/QuizTopicCard';
+import PageContainer from './ui/PageContainer';
+import SectionCard from './ui/SectionCard';
+import PrimaryButton from './ui/PrimaryButton';
+import wordFormationQuizBank from '../data/wordFormationQuizBank';
+import wordFormationTopics from '../data/wordFormationTopics';
+import getQuizQuestions from '../utils/getQuizQuestions';
 
+const whyItMatters = [
+  {
+    title: 'Grow vocabulary faster',
+    description: 'When you understand word-building patterns, one root word can unlock a whole family of useful vocabulary.',
+  },
+  {
+    title: 'Read with more confidence',
+    description: 'You can often guess the meaning of unfamiliar words by spotting familiar prefixes, suffixes, and roots.',
+  },
+  {
+    title: 'Write and speak more precisely',
+    description: 'Word formation helps you choose the correct noun, adjective, or verb for the meaning you want to express.',
+  },
+];
+
+const patternGroups = [
+  {
+    title: 'Verb to person or role',
+    label: 'Agent nouns',
+    description: 'These patterns create words for the person or thing that performs an action.',
+    affixes: ['-er', '-or', '-ant', '-ent', '-ist'],
+    examples: ['write -> writer', 'invent -> inventor', 'assist -> assistant', 'tour -> tourist'],
+  },
+  {
+    title: 'Verb to action or result',
+    label: 'Process nouns',
+    description: 'These forms describe an action, event, or outcome rather than the person doing it.',
+    affixes: ['-ion', '-ment', '-ance', '-ence'],
+    examples: ['create -> creation', 'achieve -> achievement', 'perform -> performance', 'depend -> dependence'],
+  },
+  {
+    title: 'Adjective to quality or state',
+    label: 'Abstract nouns',
+    description: 'These patterns turn descriptions into nouns that express a quality, condition, or idea.',
+    affixes: ['-ness', '-ity', '-dom'],
+    examples: ['happy -> happiness', 'popular -> popularity', 'free -> freedom', 'official -> officialdom'],
+  },
+  {
+    title: 'Prefix patterns by meaning',
+    label: 'Meaning changes',
+    description: 'Prefixes usually change meaning while the word class often stays the same, so they are powerful vocabulary shortcuts.',
+    affixes: ['un-', 're-', 'pre-', 'over-', 'under-', 'inter-', 'sub-'],
+    examples: [
+      'un-: happy -> unhappy',
+      're-: write -> rewrite',
+      'pre-: heat -> preheat',
+      'over- / under-: cook -> overcook, estimate -> underestimate',
+      'inter- / sub-: national -> international, marine -> submarine',
+    ],
+  },
+  {
+    title: 'Adjective to adverb',
+    label: 'Manner words',
+    description: 'The common -ly pattern helps adjectives describe how an action happens.',
+    affixes: ['-ly'],
+    examples: ['quick -> quickly', 'slow -> slowly', 'careful -> carefully', 'happy -> happily'],
+  },
+  {
+    title: 'Verb to adjective',
+    label: 'Describing actions or states',
+    description: 'These forms help a verb describe something as possible, active, attractive, or complete.',
+    affixes: ['-able', '-ive', '-ent', '-ing', '-ed'],
+    examples: ['enjoy -> enjoyable', 'create -> creative', 'depend -> dependent', 'interest -> interesting'],
+  },
+  {
+    title: 'Noun to adjective',
+    label: 'Describing forms',
+    description: 'These suffixes turn nouns into adjectives that describe qualities, style, or absence.',
+    affixes: ['-ous', '-ful', '-less', '-al', '-ic'],
+    examples: ['danger -> dangerous', 'care -> careful', 'hope -> hopeless', 'music -> musical'],
+  },
+  {
+    title: 'Compound words',
+    label: 'Two words together',
+    description: 'Two familiar words can combine to create one new meaning that learners meet all the time.',
+    affixes: [],
+    examples: ['toothbrush', 'coffee shop', 'blackboard', 'sunlight', 'swimming pool'],
+  },
+  {
+    title: 'Conversion',
+    label: 'Zero derivation',
+    description: 'Sometimes a word changes grammatical role without adding a prefix or suffix.',
+    affixes: [],
+    examples: ['email (noun) -> to email (verb)', 'text (noun) -> to text (verb)', 'run (verb) -> a run (noun)'],
+  },
+];
+
+const learningExamples = [
+  {
+    base: 'create',
+    transformation: 'creation',
+    lesson: 'Use -ion when you want to turn a verb into the result or product of that action.',
+  },
+  {
+    base: 'achieve',
+    transformation: 'achievement',
+    lesson: 'Use -ment when the new word refers to progress, completion, or a resulting state.',
+  },
+  {
+    base: 'happy',
+    transformation: 'happiness',
+    lesson: 'Use -ness for common quality words when you want a simple noun form.',
+  },
+  {
+    base: 'happy',
+    transformation: 'unhappy',
+    lesson: 'Prefixes like un- quickly reverse meaning while keeping the word as an adjective.',
+  },
+  {
+    base: 'careful',
+    transformation: 'carefully',
+    lesson: 'The -ly pattern often turns adjectives into adverbs that explain how something is done.',
+  },
+  {
+    base: 'create',
+    transformation: 'creative',
+    lesson: 'Verb to adjective forms like -ive help describe a person, object, or idea with that quality.',
+  },
+  {
+    base: 'danger',
+    transformation: 'dangerous',
+    lesson: 'Noun to adjective patterns like -ous and -ful help you describe qualities more precisely.',
+  },
+  {
+    base: 'email',
+    transformation: 'to email',
+    lesson: 'Conversion happens when a word changes role without adding anything new to its form.',
+  },
+];
+
+const wordFamily = {
+  root: 'create',
+  members: ['creator', 'creative', 'creativity', 'creation', 'recreate'],
+  explanation: 'When you can see a word family, one root becomes several useful forms for reading, writing, and speaking.',
+};
+
+const RECENT_QUIZ_STORAGE_KEY = 'respeako_recent_quiz_ids';
+const MAX_RECENT_IDS = 24;
+
+const quizModes = [
+  {
+    id: 'quick',
+    title: 'Quick Quiz',
+    description: 'A short focused check-in when you want fast practice.',
+    count: 5,
+    difficulty: '',
+  },
+  {
+    id: 'standard',
+    title: 'Standard Quiz',
+    description: 'A longer session for deeper review on one topic.',
+    count: 10,
+    difficulty: '',
+  },
+  {
+    id: 'challenge',
+    title: 'Challenge Mode',
+    description: 'Mixed topics at medium level for a broader review.',
+    count: 10,
+    difficulty: 'medium',
+  },
+];
+
+function SectionHeading({ eyebrow, title, description }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-300">
+        {eyebrow}
+      </p>
+      <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+        {title}
+      </h2>
+      {description && (
+        <p className="max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
+          {description}
+        </p>
+      )}
+    </div>
+  );
+}
 
 export default function WordFormation() {
-  const { darkMode } = useContext(ThemeContext);
-  const [currentQuiz, setCurrentQuiz] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState([]);
-  const [showResults, setShowResults] = useState(false);
-  const accentBg = darkMode ? "from-cyan-900/40 to-purple-900/40" : "from-indigo-50 to-purple-50";
+  const [quizView, setQuizView] = useState('topics');
+  const [selectedModeId, setSelectedModeId] = useState('quick');
+  const [quizSessionConfig, setQuizSessionConfig] = useState(null);
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [recentQuestionIds, setRecentQuestionIds] = useState([]);
 
-  const quizQuestions = [
-    {
-      question: "What is the correct noun form of 'happy'?",
-      options: ["happyness", "happiness", "happines", "hapiness"],
-      correct: 1,
-    },
-    {
-      question: "What is the correct noun form of 'invent'?",
-      options: ["inventor", "inventionist", "inventness", "inventdom"],
-      correct: 0,
-    },
-    {
-      question: "What is the correct noun form of 'improve'?",
-      options: ["improvment", "improvement", "improvance", "improvity"],
-      correct: 1,
-    },   
-    {
-      question: "What is the correct noun form of 'create'?",
-      options: ["creativeness", "creation", "creator", "creatdom"],
-      correct: 1,
-    },
-    {
-      question: "What is the correct noun form of 'depend'?",
-      options: ["dependance", "dependence", "dependment", "dependdom"],
-      correct: 1,
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const storedIds = window.localStorage.getItem(RECENT_QUIZ_STORAGE_KEY);
+      if (!storedIds) return;
+
+      const parsedIds = JSON.parse(storedIds);
+      if (Array.isArray(parsedIds)) {
+        setRecentQuestionIds(parsedIds);
+      }
+    } catch {
+      setRecentQuestionIds([]);
     }
-  ];
+  }, []);
 
-  const handleAnswerSelect = (answerIndex) => {
-    const newAnswers = [...selectedAnswers];
-    newAnswers[currentQuiz] = answerIndex;
-    setSelectedAnswers(newAnswers);
-  };
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
-  const nextQuestion = () => {
-    if (currentQuiz < quizQuestions.length - 1) {
-      setCurrentQuiz(currentQuiz + 1);
-    } else {
-      setShowResults(true);
+    window.localStorage.setItem(
+      RECENT_QUIZ_STORAGE_KEY,
+      JSON.stringify(recentQuestionIds.slice(0, MAX_RECENT_IDS))
+    );
+  }, [recentQuestionIds]);
+
+  const startQuiz = (topicId, modeId = selectedModeId) => {
+    const mode = quizModes.find((item) => item.id === modeId) || quizModes[0];
+    const questions = getQuizQuestions({
+      bank: wordFormationQuizBank,
+      topic: mode.id === 'challenge' ? 'mixed_review' : topicId,
+      difficulty: mode.difficulty,
+      count: mode.count,
+      excludeIds: recentQuestionIds,
+    });
+
+    if (questions.length === 0) {
+      return;
     }
+
+    setQuizSessionConfig({ topicId, modeId: mode.id });
+    setQuizQuestions(questions);
+    setQuizAnswers({});
+    setCurrentQuestionIndex(0);
+    setQuizView('session');
+    setRecentQuestionIds((previous) => {
+      const nextIds = [...questions.map((question) => question.id), ...previous];
+      return [...new Set(nextIds)].slice(0, MAX_RECENT_IDS);
+    });
   };
 
-  const resetQuiz = () => {
-    setCurrentQuiz(0);
-    setSelectedAnswers([]);
-    setShowResults(false);
+  const resetToTopics = () => {
+    setQuizView('topics');
+    setQuizQuestions([]);
+    setQuizAnswers({});
+    setCurrentQuestionIndex(0);
+    setQuizSessionConfig(null);
   };
 
-  const getScore = () => {
-    return selectedAnswers.reduce((score, answer, index) => {
-      return score + (answer === quizQuestions[index].correct ? 1 : 0);
-    }, 0);
+  const restartQuiz = () => {
+    if (!quizSessionConfig) {
+      resetToTopics();
+      return;
+    }
+
+    startQuiz(quizSessionConfig.topicId, quizSessionConfig.modeId);
   };
+
+  const currentQuestion = quizQuestions[currentQuestionIndex];
+
+  const topicCards = wordFormationTopics.filter((topic) => topic.id !== 'mixed_review');
 
   return (
-    <div className={`${darkMode ? "text-white" : "text-black"} transition-colors`}>
-      <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Hero */}
-        <div className={`bg-gradient-to-r ${accentBg} border border-border rounded-2xl p-8 text-center shadow-sm`}>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">English Word Formation</h1>
-          <p className="mt-2 text-muted-foreground">Master the art of creating new words from existing ones</p>
-        </div>
-        {/* Navigation */}
-        <nav className="flex flex-wrap justify-center gap-2 mb-8">
-          {["Introduction", "Explanation", "Examples", "Tips", "Quiz", "Summary"].map((section) => (
-            <Button
-              key={section}
-              variant="outline"
-              size="sm"
-              onClick={() => document.getElementById(section.toLowerCase())?.scrollIntoView({ behavior: "smooth" })}
-            >
-              {section}
-            </Button>
-          ))}
-        </nav>
-
-        {/* Introduction */}
-        <Card id="introduction" className={`scroll-mt-20 bg-gradient-to-b ${accentBg} border border-primary/20`}>
-          <CardHeader>
-            <div className="flex gap-2 text-primary font-bold text-xl">
-              <BookOpen className="h-6 w-6 text-primary" />
-              <CardTitle>Introduction</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 text-left">
-            <p className="text-foreground leading-relaxed">
-            Word formation is the process of creating new words in English. It helps learners expand vocabulary and understand how words are related. 
-            It's a fundamental aspect of English that helps expand vocabulary and express ideas more precisely.
-            </p>
-            <p className="text-foreground leading-relaxed">Understanding word formation patterns will help you:</p>
-            <ul className="list-disc list-inside space-y-2 text-foreground ml-4">
-              <li>Guess the meaning of unfamiliar words</li>
-              <li>Create new words when needed</li>
-              <li>Improve your reading comprehension</li>
-              <li>Enhance your writing skills</li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* Explanation */}
-        <Card id="explanation" className={`scroll-mt-20 bg-gradient-to-b ${accentBg} border border-primary/20`}>
-          <CardHeader>
-            <div className="flex items-center gap-2 text-primary font-bold text-xl">
-              <Target className="h-6 w-6 text-primary" />
-              <CardTitle>Detailed Explanation</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6 text-left">
-            <div>
-              <h3 className="text-xl font-semibold mb-3 text-foreground">How to form nouns?</h3>
-              <p className="text-foreground leading-relaxed">
-                →	Nouns are words that represent <span className="font-bold  text-destructive">people, places, things, or ideas.</span>
-                <br /> We often make nouns from other types of words, like verbs or adjectives. When we want to make our language more formal, we can use nouns we've made from <span className="font-bold  text-destructive">verbs or adjectives</span>.
-
-              </p>
+    <PageContainer
+      title="Word Formation"
+      description="Learn how English words are built so you can expand vocabulary, understand meaning faster, and use language more precisely."
+    >
+      <div className="space-y-8">
+        <SectionCard className="relative overflow-hidden border-none bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.2),_transparent_35%),linear-gradient(135deg,#020617_0%,#0f172a_55%,#083344_100%)] px-5 py-6 text-white shadow-[0_24px_80px_rgba(8,15,30,0.32)] sm:px-8 sm:py-8">
+          <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent_0%,rgba(255,255,255,0.04)_45%,transparent_100%)]" />
+          <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+            <div className="space-y-6">
+              <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100 backdrop-blur">
+                Build stronger word awareness
+              </span>
               <div className="space-y-4">
-
-                <div className="border-l-4 border-primary pl-4">
-                  <h4 className="font-semibold text-foreground">1. VERB → Noun/Person (-er, -or, -ant/-ent, -ist)</h4>
-                  <p className="text-muted-foreground">Always refers to a person/entity doing something, not the action or thing itself.</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="default">write → writer</Badge>
-                    <Badge variant="default">invent → inventor</Badge>
-                    <Badge variant="default">assist → assistant</Badge>
-                    <Badge variant="default">tour → tourist</Badge>
-                  </div>
-                </div>
-
-                <div className="border-l-4 border-secondary pl-4">
-                  <h4 className="font-semibold text-foreground">2.VERB → Noun (Action/Result) (-ion, -ment, -ance, -ence)</h4>
-                  <p className="text-muted-foreground">Not a person, but an action, event, or state.</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="default">invent → invention</Badge>
-                    <Badge variant="default">improve → improvement</Badge>
-                    <Badge variant="default">accept → acceptance</Badge>
-                    <Badge variant="default">depend → dependence</Badge>
-                  </div>
-                </div>
-
-                <div className="border-l-4 border-primary pl-4">
-                  <h4 className="font-semibold text-foreground">3.ADJECTIVE → Noun (Quality/State) (-ness, -dom, -ity)</h4>
-                  <p className="text-muted-foreground">Always describes a quality or state, not a person or action.</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="default">happy → happiness</Badge>
-                    <Badge variant="default">official → officialdom</Badge>
-                    <Badge variant="default">popular → popularity</Badge>
-                  </div>
-                </div>
-
-
+                <h2 className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl">
+                  Understand how words change, and your vocabulary starts to grow with less effort.
+                </h2>
+                <p className="max-w-2xl text-sm leading-6 text-slate-200 sm:text-base">
+                  Word formation gives you a practical system for reading, writing, and speaking with more
+                  confidence. Instead of memorizing words one by one, you start to recognize patterns that repeat.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3 pt-1">
+                <PrimaryButton
+                  variant="light"
+                  className="shadow-lg shadow-cyan-950/20"
+                  onClick={() => document.getElementById('patterns')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Explore Patterns
+                </PrimaryButton>
+                <Link to="/practice">
+                  <PrimaryButton variant="glass">
+                    Go to Practice
+                  </PrimaryButton>
+                </Link>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Examples */}
-        <Card id="examples" className="scroll-mt-20 border border-accent/30">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-primary font-bold text-xl">
-              <FileText className="h-6 w-6 text-primary" />
-              <CardTitle>Examples</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div>
-                <h4 className="font-semibold mb-3 text-foreground">Common Person/Agent</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-er</span>
-                    <span className="text-muted-foreground">teach → teacher</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-er</span>
-                    <span className="text-muted-foreground">write → writer </span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-or</span>
-                    <span className="text-muted-foreground">invent → inventor</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-or</span>
-                    <span className="text-muted-foreground">act → actor</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ant</span>
-                    <span className="text-muted-foreground">assist → assistant</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ist</span>
-                    <span className="text-muted-foreground">piano → pianist</span>
-                  </div>
-                </div>
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">Spot</p>
+                <p className="mt-2 text-sm leading-6 text-slate-100">
+                  Notice roots, prefixes, and suffixes that repeat across many words.
+                </p>
               </div>
-
-              <div>
-                <h4 className="font-semibold mb-3 text-foreground">Common Action/Result</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ion</span>
-                    <span className="text-muted-foreground">invent → invention</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ion</span>
-                    <span className="text-muted-foreground">create → creation </span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ment</span>
-                    <span className="text-sm text-muted-foreground">achive → achievement</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ment</span>
-                    <span className="text-muted-foreground">pay → payment</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ance</span>
-                    <span className="text-muted-foreground">attend → attendance</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ence</span>
-                    <span className="text-sm text-muted-foreground">depend → dependence</span>
-                  </div>
-                </div>
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">Connect</p>
+                <p className="mt-2 text-sm leading-6 text-slate-100">
+                  Link each pattern to its meaning so word families feel easier to remember.
+                </p>
               </div>
-
-              <div>
-                <h4 className="font-semibold mb-3 text-foreground">Common Quality/State</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ness</span>
-                    <span className="text-muted-foreground">happy → happiness</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ness</span>
-                    <span className="text-muted-foreground">rich → richness </span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ity</span>
-                    <span className="text-muted-foreground">popular → popularity</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-ity</span>
-                    <span className="text-muted-foreground">able → ability</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-dom</span>
-                    <span className="text-muted-foreground">free → freedom</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-muted rounded">
-                    <span className="font-medium">-dom</span>
-                    <span className="text-muted-foreground">official → officialdom</span>
-                  </div>
-                </div>
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">Apply</p>
+                <p className="mt-2 text-sm leading-6 text-slate-100">
+                  Use the right form when you need a person, an action, or a quality in context.
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
-        {/* Quiz */}
-        <Card id="quiz" className="scroll-mt-20 border border-primary/20">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-primary font-bold text-xl">
-              <Brain className="h-6 w-6 text-primary" />
-              <CardTitle>Interactive Quiz</CardTitle>
-              <CardDescription>Test your understanding of word formation</CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {!showResults ? (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
-                    Question {currentQuiz + 1} of {quizQuestions.length}
-                  </span>
-                  <div className="w-32 bg-muted rounded-full h-2">
-                    <div
-                      className="bg-primary h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${((currentQuiz + 1) / quizQuestions.length) * 100}%` }}
-                    />
-                  </div>
+        <section className="space-y-4">
+          <SectionHeading
+            eyebrow="Why This Matters"
+            title="Word formation gives you a system, not just a word list"
+            description="This skill helps you move from memorizing isolated vocabulary to understanding how English builds meaning across related forms."
+          />
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {whyItMatters.map((item) => (
+              <SectionCard key={item.title} className="h-full border-slate-200/80 bg-white/95 shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold text-slate-950 dark:text-white">{item.title}</h3>
+                  <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
                 </div>
+              </SectionCard>
+            ))}
+          </div>
+        </section>
 
-                <div>
-                  <h3 className="text-lg font-medium mb-4 text-foreground">{quizQuestions[currentQuiz].question}</h3>
+        <section id="patterns" className="space-y-4">
+          <SectionHeading
+            eyebrow="Word Formation Patterns"
+            title="Learn the main categories that appear again and again"
+            description="These are some of the most useful patterns for changing meaning, changing word class, and recognizing how English builds new words."
+          />
 
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {patternGroups.map((group) => (
+              <SectionCard key={group.title} className="h-full border-slate-200/80 bg-white/95 shadow-[0_20px_45px_rgba(15,23,42,0.08)] dark:border-slate-800 dark:bg-slate-900/85 dark:shadow-none">
+                <div className="space-y-5">
                   <div className="space-y-2">
-                    {quizQuestions[currentQuiz].options.map((option, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleAnswerSelect(index)}
-                        className={`w-full text-left p-3 rounded-lg border transition-colors ${selectedAnswers[currentQuiz] === index
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border hover:border-primary/50 hover:bg-muted/50"
+                    <span className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:border-cyan-900 dark:bg-cyan-950 dark:text-cyan-200">
+                      {group.label}
+                    </span>
+                    <h3 className="text-xl font-semibold text-slate-950 dark:text-white">{group.title}</h3>
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{group.description}</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {group.affixes.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {group.affixes.map((affix) => (
+                          <span
+                            key={affix}
+                            className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                          >
+                            {affix}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="space-y-2 rounded-[20px] border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                      {group.examples.map((example) => (
+                        <p key={example} className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                          {example}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </SectionCard>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <SectionHeading
+            eyebrow="Learning Examples"
+            title="Study a few transformations and notice the logic"
+            description="These examples show how a base word can shift meaning, role, or form depending on what you want to say."
+          />
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {learningExamples.map((example) => (
+              <SectionCard key={`${example.base}-${example.transformation}`} className="h-full border-slate-200/80 bg-white/95 shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
+                <div className="space-y-4">
+                  <div className="rounded-[20px] border border-cyan-100 bg-[linear-gradient(135deg,rgba(236,254,255,0.95),rgba(240,249,255,0.85))] p-4 dark:border-cyan-900 dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.4),rgba(15,23,42,0.65))]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-300">
+                      Example
+                    </p>
+                    <p className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">{example.base}</p>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">becomes</p>
+                    <p className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">{example.transformation}</p>
+                  </div>
+                  <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{example.lesson}</p>
+                </div>
+              </SectionCard>
+            ))}
+          </div>
+
+          <SectionCard className="border-slate-200/80 bg-[linear-gradient(135deg,rgba(236,254,255,0.95),rgba(240,249,255,0.85))] shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.4),rgba(15,23,42,0.65))] dark:shadow-none">
+            <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <div className="space-y-3">
+                <span className="inline-flex rounded-full border border-cyan-200 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:border-cyan-900 dark:bg-slate-950/40 dark:text-cyan-200">
+                  Word family awareness
+                </span>
+                <h3 className="text-xl font-semibold text-slate-950 dark:text-white">{wordFamily.root}</h3>
+                <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{wordFamily.explanation}</p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {wordFamily.members.map((member) => (
+                  <div
+                    key={member}
+                    className="rounded-[18px] border border-slate-200 bg-white/85 px-4 py-4 text-center shadow-sm dark:border-slate-800 dark:bg-slate-950/70"
+                  >
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{wordFamily.root}</p>
+                    <p className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">{member}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </SectionCard>
+        </section>
+
+        <section className="space-y-4">
+          <SectionHeading
+            eyebrow="Mini Quiz"
+            title="Practice in short, focused sessions"
+            description="Use the mini quiz to study one topic at a time, avoid repetition, and build confidence through small review sessions."
+          />
+
+          {quizView === 'topics' && (
+            <div className="space-y-5">
+              <SectionCard className="border-slate-200/80 bg-[linear-gradient(135deg,rgba(236,254,255,0.95),rgba(240,249,255,0.85))] shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.4),rgba(15,23,42,0.65))] dark:shadow-none">
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <span className="inline-flex rounded-full border border-cyan-200 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:border-cyan-900 dark:bg-slate-950/40 dark:text-cyan-200">
+                      Quick actions
+                    </span>
+                    <h3 className="text-xl font-semibold text-slate-950 dark:text-white">Start a guided review</h3>
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Jump into a short quiz, focus on prefixes, or review word families without leaving the lesson flow.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    <PrimaryButton className="w-full sm:w-auto" onClick={() => startQuiz('mixed_review', 'quick')}>
+                      Start Quick Quiz
+                    </PrimaryButton>
+                    <PrimaryButton
+                      variant="secondary"
+                      className="w-full sm:w-auto"
+                      onClick={() => startQuiz('prefixes', 'quick')}
+                    >
+                      Practice Prefixes
+                    </PrimaryButton>
+                    <PrimaryButton
+                      variant="secondary"
+                      className="w-full sm:w-auto"
+                      onClick={() => startQuiz('word_families', 'quick')}
+                    >
+                      Practice Word Families
+                    </PrimaryButton>
+                    <PrimaryButton
+                      className="w-full border border-cyan-300 bg-cyan-50 text-cyan-900 hover:bg-cyan-100 dark:border-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-100 sm:w-auto"
+                      onClick={() => startQuiz('mixed_review', 'challenge')}
+                    >
+                      Challenge Mode
+                    </PrimaryButton>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard className="border-slate-200/80 bg-white/95 shadow-[0_20px_45px_rgba(15,23,42,0.08)] dark:border-slate-800 dark:bg-slate-900/85 dark:shadow-none">
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                      Topic selection
+                    </span>
+                    <h3 className="text-xl font-semibold text-slate-950 dark:text-white">Study by topic</h3>
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Choose a quiz mode first, then start a topic card. Recent questions are filtered out automatically when possible.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {quizModes.map((mode) => {
+                      const isSelected = selectedModeId === mode.id;
+
+                      return (
+                        <button
+                          key={mode.id}
+                          type="button"
+                          onClick={() => setSelectedModeId(mode.id)}
+                          className={`rounded-2xl border p-4 text-left transition ${
+                            isSelected
+                              ? 'border-cyan-500 bg-cyan-50 dark:border-cyan-400 dark:bg-cyan-950/30'
+                              : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/60'
                           }`}
-                      >
-                        {option}
-                      </button>
+                        >
+                          <p className="text-sm font-semibold text-slate-950 dark:text-white">{mode.title}</p>
+                          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                            {mode.description}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {topicCards.map((topic) => (
+                      <QuizTopicCard
+                        key={topic.id}
+                        topic={topic}
+                        onStart={(topicId) => startQuiz(topicId, selectedModeId === 'challenge' ? 'quick' : selectedModeId)}
+                      />
                     ))}
                   </div>
                 </div>
-
-                <Button onClick={nextQuestion} disabled={selectedAnswers[currentQuiz] === undefined} className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:opacity-90">
-                  {currentQuiz === quizQuestions.length - 1 ? "Finish Quiz" : "Next Question"}
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center space-y-4">
-                <div className="text-4xl font-bold text-primary">
-                  {getScore()}/{quizQuestions.length}
-                </div>
-                <p className="text-lg text-foreground">
-                  You got {getScore()} out of {quizQuestions.length} questions correct!
-                </p>
-                <p className="text-muted-foreground">
-                  {getScore() === quizQuestions.length
-                    ? "Perfect! You've mastered word formation!"
-                    : getScore() >= 3
-                      ? "Great job! Keep practicing to improve further."
-                      : "Good effort! Review the material and try again."}
-                </p>
-                <Button onClick={resetQuiz} variant="outline">
-                  Try Again
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Tips */}
-        <Card id="tips" className={`scroll-mt-20 bg-gradient-to-b ${accentBg} border border-primary/20`}>
-          <CardHeader>
-            <div className="flex items-center gap-2 text-primary font-bold text-xl">
-              <Lightbulb className="h-6 w-6 text-primary" />
-              <CardTitle>Memory Tips</CardTitle>
+              </SectionCard>
             </div>
-          </CardHeader>
-          <CardContent className="text-left">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3 p-3 bg-accent/10 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h5 className="font-medium text-foreground">Learn Root Words</h5>
-                    <p className="text-sm text-muted-foreground">Focus on common root words and their meanings</p>
-                  </div>
-                </div>
+          )}
 
-                <div className="flex items-start gap-3 p-3 bg-accent/10 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h5 className="font-medium text-foreground">Practice Patterns</h5>
-                    <p className="text-sm text-muted-foreground">Notice patterns in how prefixes and suffixes work</p>
-                  </div>
-                </div>
+          {quizView === 'session' && currentQuestion && (
+            <QuizQuestionCard
+              question={currentQuestion}
+              currentIndex={currentQuestionIndex}
+              totalQuestions={quizQuestions.length}
+              answer={quizAnswers[currentQuestion.id] || ''}
+              onAnswerChange={(answer) =>
+                setQuizAnswers((previous) => ({
+                  ...previous,
+                  [currentQuestion.id]: answer,
+                }))
+              }
+              onNext={() => {
+                if (currentQuestionIndex === quizQuestions.length - 1) {
+                  setQuizView('result');
+                  return;
+                }
 
-                <div className="flex items-start gap-3 p-3 bg-accent/10 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h5 className="font-medium text-foreground">Use Context Clues</h5>
-                    <p className="text-sm text-muted-foreground">Use surrounding words to guess meanings</p>
-                  </div>
-                </div>
-              </div>
+                setCurrentQuestionIndex((previous) => previous + 1);
+              }}
+            />
+          )}
 
-              <div className="space-y-3">
-                <div className="flex items-start gap-3 p-3 bg-primary/10 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h5 className="font-medium text-foreground">Make Word Families</h5>
-                    <p className="text-sm text-muted-foreground">Group words with the same root together</p>
-                  </div>
-                </div>
+          {quizView === 'result' && (
+            <QuizResultCard
+              questions={quizQuestions}
+              answers={quizAnswers}
+              onRestart={restartQuiz}
+              onBackToTopics={resetToTopics}
+            />
+          )}
+        </section>
 
-                <div className="flex items-start gap-3 p-3 bg-primary/10 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h5 className="font-medium text-foreground">Read Extensively</h5>
-                    <p className="text-sm text-muted-foreground">Exposure to various texts helps recognition</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-3 bg-primary/10 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h5 className="font-medium text-foreground">Keep a Word Journal</h5>
-                    <p className="text-sm text-muted-foreground">Record new words and their formations</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Summary */}
-        <Card id="summary" className={`scroll-mt-20 bg-gradient-to-b ${accentBg} border border-primary/20`}>
-          <CardHeader>
-            <div className="flex items-center gap-2 text-primary font-bold text-xl">
-              <CheckCircle className="h-6 w-6 text-primary" />
-              <CardTitle>Summary</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 text-left">
-            <p className="text-foreground leading-relaxed">
-              Word formation is a powerful tool for expanding your English vocabulary. By understanding how prefixes,
-              suffixes, and compound words work, you can decode unfamiliar words and create new ones when needed.
-            </p>
-
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <h4 className="font-semibold mb-2 text-foreground">Key Takeaways:</h4>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                <li>• suffix + base word + meaning → word</li>
-                <li>• Context helps you understand new word formations</li>
-                <li>• Regular practice improves recognition and usage</li>
-              </ul>
+        <SectionCard className="border-none bg-[linear-gradient(135deg,rgba(34,211,238,0.14),rgba(14,165,233,0.08),rgba(255,255,255,0.55))] shadow-[0_18px_48px_rgba(15,23,42,0.08)] dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.4),rgba(15,23,42,0.6),rgba(2,6,23,0.72))] dark:shadow-none">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-300">
+                Final CTA
+              </p>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+                Turn pattern awareness into everyday vocabulary growth
+              </h2>
+              <p className="text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
+                Revisit these formations, notice them in reading, and practice using the right word form when you
+                speak or write.
+              </p>
             </div>
 
-            <p className="text-foreground leading-relaxed">
-              Continue practicing by reading diverse texts, keeping a vocabulary journal, and paying attention to word
-              patterns. With time and practice, word formation will become second nature!
-            </p>
-          </CardContent>
-        </Card>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link to="/practice">
+                <PrimaryButton className="w-full sm:w-auto">Practice With ReSpeako</PrimaryButton>
+              </Link>
+              <Link to="/learning">
+                <PrimaryButton variant="secondary" className="w-full sm:w-auto">
+                  Back to Learning Hub
+                </PrimaryButton>
+              </Link>
+            </div>
+          </div>
+        </SectionCard>
       </div>
-
-    </div>
-  )
+    </PageContainer>
+  );
 }

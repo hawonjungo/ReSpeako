@@ -35,7 +35,6 @@ const Header = () => {
     const items = [
         { label: "Home", href: "/" },
         { label: "Learning", href: "/learning" },
-        { label: "Practicing", href: "/practicing" },
     ];
 
     return (
