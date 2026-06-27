@@ -9,6 +9,8 @@ export default function useReSpeakoActions({
   resetTranscriptBuffer,
   speak,
   fetchIpa,
+  stopSpeaking,
+  onClearText,
 }) {
   const resetFeedback = useCallback((transcript = '') => {
     setFeedback({
@@ -89,11 +91,13 @@ export default function useReSpeakoActions({
     }
   }, [fetchIpa, setErrorFeedback, setLoadingFeedback, setSuccessFeedback, text]);
 
-  const clearText = useCallback(() => {
+  const clearText = useCallback(async () => {
     setText('');
     resetFeedback();
     resetTranscriptBuffer();
-  }, [resetFeedback, resetTranscriptBuffer, setText]);
+    await stopSpeaking();
+    onClearText?.();
+  }, [onClearText, resetFeedback, resetTranscriptBuffer, setText, stopSpeaking]);
 
   return {
     handleListen,

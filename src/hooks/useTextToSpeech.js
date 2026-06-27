@@ -1,6 +1,22 @@
 import { Capacitor } from '@capacitor/core';
 
 export default function useTextToSpeech() {
+  const stop = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { TextToSpeech } = await import('@capacitor-community/text-to-speech');
+        await TextToSpeech.stop();
+      } catch {
+        // Ignore stop errors for this flow.
+      }
+      return;
+    }
+
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
   const speak = async (text) => {
     if (!text?.trim()) return;
 
@@ -33,5 +49,5 @@ export default function useTextToSpeech() {
     window.speechSynthesis.speak(utterance);
   };
 
-  return { speak };
+  return { speak, stop };
 }

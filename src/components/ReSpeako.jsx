@@ -12,6 +12,8 @@ import useDictionaryIpa from '../hooks/useDictionaryIpa';
 import useReSpeakoActions from '../hooks/useReSpeakoActions';
 import useSpeechRecognition from '../hooks/useSpeechRecognition';
 
+const READ_ALOUD_DURATION = 40;
+
 const initialFeedback = {
   status: 'idle',
   transcript: '',
@@ -45,6 +47,47 @@ const ReSpeako = () => {
     onTranscriptChange: (nextTranscript) => handleTranscriptChange(nextTranscript, 'speech'),
   });
 
+  const [timeLeft, setTimeLeft] = useState(READ_ALOUD_DURATION);
+  const [isReadAloudActive, setIsReadAloudActive] = useState(false);
+   const [showTimerBadge, setShowTimerBadge] = useState(false);
+  const timerRef = useRef(null);
+
+  const startReadAloud = async () => {
+    setTimeLeft(READ_ALOUD_DURATION);
+    setIsReadAloudActive(true);
+     setShowTimerBadge(true);
+  };
+
+  const stopReadAloud = async () => {
+    setIsReadAloudActive(false);
+  };
+
+  useEffect(() => {
+    if (!isReadAloudActive) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+      return undefined;
+    }
+
+    timerRef.current = window.setInterval(() => {
+      setTimeLeft((current) => {
+        if (current <= 1) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+          setIsReadAloudActive(false);
+          setShowTimerBadge(false);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    };
+  }, [isReadAloudActive]);
+
   // ui state
   const containerRef = useRef(null);
   const inputRef = useRef(null);
@@ -53,7 +96,7 @@ const ReSpeako = () => {
   const hasText = Boolean(text.trim());
   const transcript = text;
 
-  const { speak } = useTextToSpeech();
+  const { speak, stop: stopSpeaking } = useTextToSpeech();
   const { fetchIpa } = useDictionaryIpa();
   const {
     handleListen,
@@ -70,8 +113,25 @@ const ReSpeako = () => {
     resetTranscriptBuffer,
     speak,
     fetchIpa,
+    stopSpeaking,
+    onClearText: () => {
+      setTimeLeft(READ_ALOUD_DURATION);
+      setIsReadAloudActive(false);
+      setShowTimerBadge(false);
+    },
   });
+  const handleListenAction = async () => {
+    if (!isListening) {
+      setTimeLeft(READ_ALOUD_DURATION);
+      setIsReadAloudActive(true);
+      setShowTimerBadge(true);
+    } else {
+      setShowTimerBadge(false);
+      setIsReadAloudActive(false);
+    }
 
+    await handleListen();
+  };
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return undefined;
 
@@ -111,6 +171,14 @@ const ReSpeako = () => {
     }
   }, [setErrorFeedback, speechError, text]);
 
+  const handleSpeakAction = async () => {
+    setTimeLeft(READ_ALOUD_DURATION);
+    setIsReadAloudActive(true);
+    setShowTimerBadge(true);
+
+    await handleSpeak();
+  };
+
   return (
     <PageContainer
       title="Practice"
@@ -128,6 +196,8 @@ const ReSpeako = () => {
               inputRef={inputRef}
               onTranscriptChange={handleTranscriptChange}
               onClear={clearText}
+              showTimer={showTimerBadge}
+              timeLeft={timeLeft}
             />
           </SectionCard>
 
@@ -135,8 +205,8 @@ const ReSpeako = () => {
             <ActionBar
               isListening={isListening}
               hasText={hasText}
-              onListen={handleListen}
-              onSpeak={handleSpeak}
+              onListen={handleListenAction}
+              onSpeak={handleSpeakAction}
               onCheckIpa={handleCheckIpa}
             />
           </SectionCard>
