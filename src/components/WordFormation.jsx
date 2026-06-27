@@ -200,6 +200,28 @@ export default function WordFormation() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [recentQuestionIds, setRecentQuestionIds] = useState([]);
 
+  const promptWordMeanings = {
+    create: 'tạo ra',
+    achieve: 'đạt được',
+    depend: 'phụ thuộc',
+    decide: 'quyết định',
+    teach: 'dạy',
+    invent: 'phát minh',
+    assist: 'giúp đỡ',
+    act: 'hành động',
+    happy: 'hạnh phúc',
+    popular: 'phổ biến',
+    free: 'tự do',
+    danger: 'nguy hiểm',
+    care: 'chăm sóc',
+    music: 'âm nhạc',
+    quick: 'nhanh chóng',
+    careful: 'cẩn thận',
+    email: 'thư điện tử',
+  };
+
+  const getMeaningForPromptWord = (word) => promptWordMeanings[word] || '';
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -224,6 +246,7 @@ export default function WordFormation() {
       JSON.stringify(recentQuestionIds.slice(0, MAX_RECENT_IDS))
     );
   }, [recentQuestionIds]);
+
 
   const startQuiz = (topicId, modeId = selectedModeId) => {
     const mode = quizModes.find((item) => item.id === modeId) || quizModes[0];

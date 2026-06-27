@@ -40,6 +40,11 @@ export default function QuizQuestionCard({
                 Focus word: <span className="font-medium text-slate-900 dark:text-white">{question.promptWord}</span>
               </p>
             )}
+            {question.meaning ? (
+              <p className="text-sm text-slate-500 dark:text-slate-300">
+                Meaning: <span className="font-medium text-slate-900 dark:text-white">{question.meaning}</span>
+              </p>
+            ) : null}
           </div>
 
           {question.type === 'fill_blank' ? (
