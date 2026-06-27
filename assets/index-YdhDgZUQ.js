@@ -1,2 +1,0 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/web-BlNMBYjQ.js","assets/index-WidYP09X.js","assets/index-BYc7RrEx.css"])))=>i.map(i=>d[i]);
-import{r,_ as t}from"./index-WidYP09X.js";var o;(function(e){e[e.Flush=0]="Flush",e[e.Add=1]="Add"})(o||(o={}));const i=r("TextToSpeech",{web:()=>t(()=>import("./web-BlNMBYjQ.js"),__vite__mapDeps([0,1,2])).then(e=>new e.TextToSpeechWeb)});export{o as QueueStrategy,i as TextToSpeech};
