@@ -1,13 +1,17 @@
 import React, { useContext } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { ThemeContext } from '../ThemeContext';
+import { LanguageContext } from '../../contexts/LanguageContext';
+import { translations } from '../../i18n/translations';
 import RotatingText from '../RotatingText';
 import GooeyNav from '../GooeyNav';
 
 
 const Header = () => {
     const { darkMode } = useContext(ThemeContext);
+    const { language, setLanguage } = useContext(LanguageContext);
     const location = useLocation();
+    const t = translations[language];
 
     // Icon mapping for different pages
     const getPageIcon = (pathname) => {
@@ -22,25 +26,27 @@ const Header = () => {
     };
     // sologan mapping for different pages
     const getPageSologan = (pathname) => {
-        const sologanMap = {
-            '/': 'Make Every Word Count!',
-            '/learning': ' Unlock your English potential with interactive lessons!',
-            '/ipa-pronounce': 'Speak clearly with the power of phonetics',
-            '/loop-lab': 'Practice makes perfect',
-            '/word-formation': ' Master the art of creating new words from existing ones'
-        };
-        return sologanMap[pathname] || 'Make Every Word Count!';
+        return t.header.slogans[pathname] || t.header.slogans['/'];
     };
 
     const items = [
-        { label: "Home", href: "/" },
-        { label: "Learning", href: "/learning" },
+        { label: t.common.home, href: "/" },
+        { label: t.common.learning, href: "/learning" },
     ];
 
     return (
         <header
             className={`relative container mx-auto  py-4 flex flex-col items-center ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px]`}
         >
+            <div className="mb-3 flex w-full items-center justify-end">
+                <button
+                    type="button"
+                    onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
+                    className="rounded-full border border-cyan-500/30 bg-cyan-50 px-3 py-1.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100 dark:border-cyan-400/40 dark:bg-cyan-950/40 dark:text-cyan-200"
+                >
+                    {language === 'en' ? t.common.vietnamese : t.common.english}
+                </button>
+            </div>
             <GooeyNav items={items} />            
             <img src="/rosaSinging.png" alt="Banner" className="my-4 max-w-full h-auto" />
             <h1 className=" text-2xl font-bold mb-2 text-center flex">

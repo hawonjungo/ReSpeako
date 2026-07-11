@@ -1,5 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { ThemeContext } from './ThemeContext';
+import { LanguageContext } from '../contexts/LanguageContext';
+import { translations } from '../i18n/translations';
 import { Capacitor } from '@capacitor/core';
 import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
@@ -93,6 +95,8 @@ const ReSpeako = () => {
   const inputRef = useRef(null);
   const [keyboardPadding, setKeyboardPadding] = useState(0);
   const { darkMode } = useContext(ThemeContext);
+  const { language } = useContext(LanguageContext);
+  const t = translations[language].reSpeako;
   const hasText = Boolean(text.trim());
   const transcript = text;
 
@@ -181,8 +185,8 @@ const ReSpeako = () => {
 
   return (
     <PageContainer
-      title="Practice"
-      description="Speak, type, and review pronunciation in one place."
+      title={t.pageTitle}
+      description={t.description}
     >
       <div
         ref={containerRef}

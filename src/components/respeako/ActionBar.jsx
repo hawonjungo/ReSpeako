@@ -1,6 +1,9 @@
+import { useContext } from 'react';
 import PrimaryButton from '../ui/PrimaryButton';
 import StatusBanner from '../ui/StatusBanner';
 import { Mic, MicOff, SearchCheck, Volume2 } from 'lucide-react';
+import { LanguageContext } from '../../contexts/LanguageContext';
+import { translations } from '../../i18n/translations';
 
 export default function ActionBar({
   isListening,
@@ -9,6 +12,9 @@ export default function ActionBar({
   onSpeak,
   onCheckIpa,
 }) {
+  const { language } = useContext(LanguageContext);
+  const t = translations[language].reSpeako.actions;
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
@@ -16,24 +22,24 @@ export default function ActionBar({
           {isListening ? (
             <>
               <MicOff className="h-5 w-5" />
-              Stop
+              {t.stop}
             </>
           ) : (
             <>
               <Mic className="h-5 w-5" />
-              Speak
+              {t.speak}
             </>
           )}
         </PrimaryButton>
 
         <PrimaryButton onClick={onSpeak} disabled={!hasText}>
           <Volume2 className="h-5 w-5" />
-          Play
+          {t.play}
         </PrimaryButton>
 
         <PrimaryButton onClick={onCheckIpa} disabled={!hasText} className="ml-auto">
           <SearchCheck className="h-5 w-5" />
-          Check IPA
+          {t.checkIpa}
         </PrimaryButton>
       </div>
 
@@ -41,8 +47,8 @@ export default function ActionBar({
         type="info"
         message={
           isListening
-            ? 'Listening now. Speak clearly to capture your words.'
-            : 'Tap the mic and start speaking.'
+            ? translations[language].reSpeako.status.listening
+            : translations[language].reSpeako.status.idle
         }
       />
     </div>

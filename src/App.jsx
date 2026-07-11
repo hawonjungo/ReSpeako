@@ -5,6 +5,7 @@ import AppShell from './components/layouts/AppShell'
 import ReSpeako from './components/ReSpeako'
 import ThemeToggle from './components/ThemeToggle'
 import ThemeProvider from './components/ThemeContext'
+import LanguageProvider from './contexts/LanguageContext'
 import CatPawBtn from './components/CatPawBtn'
 import Header from './components/layouts/Header'
 
@@ -17,6 +18,7 @@ import WordFormation from './components/WordFormation'
 function App() {
   return (
     <ThemeProvider>
+      <LanguageProvider>
       <HashRouter>
         <AppShell header={<Header />}>
           <div className="relative">
@@ -34,6 +36,7 @@ function App() {
           </div>
         </AppShell>
       </HashRouter>
+      </LanguageProvider>
     </ThemeProvider>
   )
 }

@@ -1,7 +1,12 @@
+import { useContext } from 'react';
 import EmptyState from '../ui/EmptyState';
 import StatusBanner from '../ui/StatusBanner';
+import { LanguageContext } from '../../contexts/LanguageContext';
+import { translations } from '../../i18n/translations';
 
 export default function FeedbackPanel({ feedback }) {
+  const { language } = useContext(LanguageContext);
+  const t = translations[language].reSpeako;
   const {
     status,
     transcript,
@@ -13,21 +18,21 @@ export default function FeedbackPanel({ feedback }) {
   return (
     <div className="w-full text-left">
       <div className="mb-3">
-        <h2 className="text-lg font-semibold">Pronunciation Feedback</h2>
+        <h2 className="text-lg font-semibold">{t.headings.pronunciationFeedback}</h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-          Review the phonetic result and word meaning here.
+          {t.headings.feedbackDescription}
         </p>
       </div>
 
       {status === 'idle' && !transcript && (
         <EmptyState
-          title="No results yet"
-          description="Type a word or start speaking to see pronunciation feedback."
+          title={t.status.noResultsTitle}
+          description={t.status.noResultsDescription}
         />
       )}
 
       {status === 'loading' && (
-        <StatusBanner type="info" message={message || 'Checking pronunciation...'} />
+        <StatusBanner type="info" message={message || t.status.loading} />
       )}
 
       {status === 'error' && (
@@ -42,13 +47,13 @@ export default function FeedbackPanel({ feedback }) {
             </p>
             {definition && (
               <p className="mt-2 text-sm text-gray-700 dark:text-gray-200">
-                <strong>Meaning:</strong> {definition}
+                <strong>{language === 'vi' ? 'Nghĩa:' : 'Meaning:'}</strong> {definition}
               </p>
             )}
           </div>
 
           <div className="mt-4 rounded-xl border border-dashed p-4 text-sm text-gray-600 dark:text-gray-300">
-            Next step: listen to the word again and repeat it slowly.
+            {t.status.nextStep}
           </div>
         </>
       )}

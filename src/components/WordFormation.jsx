@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import QuizQuestionCard from './wordFormationQuiz/QuizQuestionCard';
 import QuizResultCard from './wordFormationQuiz/QuizResultCard';
@@ -9,6 +9,8 @@ import PrimaryButton from './ui/PrimaryButton';
 import wordFormationQuizBank from '../data/wordFormationQuizBank';
 import wordFormationTopics from '../data/wordFormationTopics';
 import getQuizQuestions from '../utils/getQuizQuestions';
+import { LanguageContext } from '../contexts/LanguageContext';
+import { translations } from '../i18n/translations';
 
 const whyItMatters = [
   {
@@ -173,6 +175,69 @@ const quizModes = [
   },
 ];
 
+const wordTypeStudyCards = [
+  {
+    id: 'adj',
+    shortLabel: 'Adj',
+    label: 'Adjective',
+    subtitle: 'Tính từ',
+    description: 'Adjectives describe nouns and answer questions like “what kind?” or “which one?”.',
+    placement: 'They usually come before a noun or after a linking verb such as be, seem, look, feel, smell, or taste.',
+    clueLabel: 'Common endings',
+    clues: ['-ful', '-less', '-ous', '-ive', '-al', '-able'],
+    examples: ['a beautiful smile', 'The weather is cold', 'She looks tired'],
+    tip: 'Use an adjective after a linking verb when you describe a condition or quality.',
+  },
+  {
+    id: 'adv',
+    shortLabel: 'Adv',
+    label: 'Adverb',
+    subtitle: 'Trạng từ',
+    description: 'Adverbs modify verbs, adjectives, or other adverbs and often explain how, when, where, or to what degree.',
+    placement: 'They often appear after the main verb, at the end of a clause, or before the main verb for frequency words.',
+    clueLabel: 'Common clues',
+    clues: ['-ly', 'very', 'often', 'always', 'here', 'there'],
+    examples: ['She sings beautifully', 'He runs very fast', 'I always wake up early'],
+    tip: 'Many adverbs are formed with -ly, but not all of them.',
+  },
+  {
+    id: 'noun',
+    shortLabel: 'Noun',
+    label: 'Noun',
+    subtitle: 'Danh từ',
+    description: 'Nouns name people, places, things, ideas, or emotions and are the core of a sentence.',
+    placement: 'They often come after an article such as a, an, or the, or act as the subject of the sentence.',
+    clueLabel: 'Common endings',
+    clues: ['-tion', '-sion', '-ness', '-ment', '-er', '-ity'],
+    examples: ['The dog is barking', 'Love is powerful', 'She bought a laptop'],
+    tip: 'A noun can be concrete or abstract, so look for the thing or concept being discussed.',
+  },
+  {
+    id: 'verb',
+    shortLabel: 'Verb',
+    label: 'Verb',
+    subtitle: 'Động từ',
+    description: 'Verbs express action, state, or event and usually carry the main meaning of the sentence.',
+    placement: 'They change form for tense, person, and number, and they often sit after the subject.',
+    clueLabel: 'Common types',
+    clues: ['action verbs', 'linking verbs', 'modal verbs', 'auxiliary verbs'],
+    examples: ['She runs every morning', 'He seems happy', 'They have finished the work'],
+    tip: 'The verb is often the easiest way to spot the main action or state in a sentence.',
+  },
+  {
+    id: 'prep',
+    shortLabel: 'Prep',
+    label: 'Preposition',
+    subtitle: 'Giới từ',
+    description: 'Prepositions show relationships of place, time, cause, or direction between words in a sentence.',
+    placement: 'They come before a noun or pronoun and create a prepositional phrase.',
+    clueLabel: 'Common prepositions',
+    clues: ['in / on / at', 'for / during / since', 'by / with / about', 'through / across / between'],
+    examples: ['The book is on the table', 'She arrived at 9 a.m.', 'We walked through the park'],
+    tip: 'If you see a word that introduces a location, time, or direction, it is often a preposition.',
+  },
+];
+
 function SectionHeading({ eyebrow, title, description }) {
   return (
     <div className="space-y-3">
@@ -195,10 +260,39 @@ export default function WordFormation() {
   const [quizView, setQuizView] = useState('topics');
   const [selectedModeId, setSelectedModeId] = useState('quick');
   const [quizSessionConfig, setQuizSessionConfig] = useState(null);
+  const [activeWordType, setActiveWordType] = useState('adj');
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [quizAnswers, setQuizAnswers] = useState({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [recentQuestionIds, setRecentQuestionIds] = useState([]);
+  const { language } = useContext(LanguageContext);
+  const t = translations[language].wordFormation;
+  const whyItMattersContent = whyItMatters.map((item, index) => ({
+    ...item,
+    ...(t.whyMatters?.items?.[index] || {}),
+  }));
+  const patternGroupsContent = patternGroups.map((group, index) => ({
+    ...group,
+    ...(t.patterns?.groups?.[index] || {}),
+  }));
+  const learningExamplesContent = learningExamples.map((example, index) => ({
+    ...example,
+    lesson: t.learningExamples?.items?.[index]?.lesson || example.lesson,
+  }));
+  const quizModeOptions = quizModes.map((mode, index) => ({
+    ...mode,
+    title: t.quiz?.modes?.[index]?.title || mode.title,
+    description: t.quiz?.modes?.[index]?.description || mode.description,
+  }));
+  const wordFamilyContent = {
+    root: wordFamily.root,
+    members: wordFamily.members,
+    explanation: t.learningExamples.wordFamilyExplanation,
+  };
+  const translatedWordTypeStudyCards = wordTypeStudyCards.map((card, index) => ({
+    ...card,
+    ...(t.partsOfSpeech?.studyCards?.[index] || {}),
+  }));
 
   const promptWordMeanings = {
     create: 'tạo ra',
@@ -291,13 +385,14 @@ export default function WordFormation() {
   };
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
+  const activeWordTypeData = translatedWordTypeStudyCards.find((item) => item.id === activeWordType) || translatedWordTypeStudyCards[0];
 
   const topicCards = wordFormationTopics.filter((topic) => topic.id !== 'mixed_review');
 
   return (
     <PageContainer
-      title="Word Formation"
-      description="Learn how English words are built so you can expand vocabulary, understand meaning faster, and use language more precisely."
+      title={t.pageTitle}
+      description={t.description}
     >
       <div className="space-y-8">
         <SectionCard className="relative overflow-hidden border-none bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.2),_transparent_35%),linear-gradient(135deg,#020617_0%,#0f172a_55%,#083344_100%)] px-5 py-6 text-white shadow-[0_24px_80px_rgba(8,15,30,0.32)] sm:px-8 sm:py-8">
@@ -305,15 +400,14 @@ export default function WordFormation() {
           <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div className="space-y-6">
               <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100 backdrop-blur">
-                Build stronger word awareness
+                {t.hero.eyebrow}
               </span>
               <div className="space-y-4">
                 <h2 className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl">
-                  Understand how words change, and your vocabulary starts to grow with less effort.
+                  {t.hero.title}
                 </h2>
                 <p className="max-w-2xl text-sm leading-6 text-slate-200 sm:text-base">
-                  Word formation gives you a practical system for reading, writing, and speaking with more
-                  confidence. Instead of memorizing words one by one, you start to recognize patterns that repeat.
+                  {t.hero.description}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 pt-1">
@@ -322,11 +416,11 @@ export default function WordFormation() {
                   className="shadow-lg shadow-cyan-950/20"
                   onClick={() => document.getElementById('patterns')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  Explore Patterns
+                  {t.hero.primaryButton}
                 </PrimaryButton>
                 <Link to="/practice">
                   <PrimaryButton variant="glass">
-                    Go to Practice
+                    {t.hero.secondaryButton}
                   </PrimaryButton>
                 </Link>
               </div>
@@ -334,21 +428,21 @@ export default function WordFormation() {
 
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
               <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">Spot</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">{t.cards.spot}</p>
                 <p className="mt-2 text-sm leading-6 text-slate-100">
-                  Notice roots, prefixes, and suffixes that repeat across many words.
+                  {t.cards.spotText}
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">Connect</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">{t.cards.connect}</p>
                 <p className="mt-2 text-sm leading-6 text-slate-100">
-                  Link each pattern to its meaning so word families feel easier to remember.
+                  {t.cards.connectText}
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">Apply</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">{t.cards.apply}</p>
                 <p className="mt-2 text-sm leading-6 text-slate-100">
-                  Use the right form when you need a person, an action, or a quality in context.
+                  {t.cards.applyText}
                 </p>
               </div>
             </div>
@@ -357,13 +451,147 @@ export default function WordFormation() {
 
         <section className="space-y-4">
           <SectionHeading
-            eyebrow="Why This Matters"
-            title="Word formation gives you a system, not just a word list"
-            description="This skill helps you move from memorizing isolated vocabulary to understanding how English builds meaning across related forms."
+            eyebrow={t.partsOfSpeech.eyebrow}
+            title={t.partsOfSpeech.title}
+            description={t.partsOfSpeech.description}
+          />
+
+          <SectionCard className="border-slate-200/80 bg-white/95 shadow-[0_20px_45px_rgba(15,23,42,0.08)] dark:border-slate-800 dark:bg-slate-900/85 dark:shadow-none">
+            <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {translatedWordTypeStudyCards.map((type) => {
+                    const isActive = activeWordType === type.id;
+
+                    return (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => setActiveWordType(type.id)}
+                        className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                          isActive
+                            ? 'border-cyan-500 bg-cyan-50 text-cyan-700 dark:border-cyan-400 dark:bg-cyan-950/40 dark:text-cyan-200'
+                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-200'
+                        }`}
+                      >
+                        <span>{type.label}</span>
+                        <span className="ml-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                          {type.subtitle}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-800 dark:bg-slate-950/70">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-300">
+                        {t.partsOfSpeech.currentFocus}
+                      </p>
+                      <h3 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">
+                        {activeWordTypeData.label}
+                      </h3>
+                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{activeWordTypeData.subtitle}</p>
+                    </div>
+                    <span className="rounded-full border border-cyan-200 bg-white px-3 py-1 text-sm font-semibold text-cyan-700 dark:border-cyan-900 dark:bg-slate-950 dark:text-cyan-200">
+                      {activeWordTypeData.shortLabel}
+                    </span>
+                  </div>
+
+                  <p className="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                    {activeWordTypeData.description}
+                  </p>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                        {t.partsOfSpeech.placement}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        {activeWordTypeData.placement}
+                      </p>
+                    </div>
+                    <div className="rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                        {t.partsOfSpeech.quickTip}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        {activeWordTypeData.tip}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                      {activeWordTypeData.clueLabel}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {activeWordTypeData.clues.map((clue) => (
+                        <span
+                          key={clue}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                        >
+                          {clue}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                      {t.partsOfSpeech.examples}
+                    </p>
+                    <ul className="mt-3 space-y-2">
+                      {activeWordTypeData.examples.map((example) => (
+                        <li key={example} className="rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+                          {example}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <SectionCard className="border-slate-200/80 bg-[linear-gradient(135deg,rgba(236,254,255,0.95),rgba(240,249,255,0.85))] shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.4),rgba(15,23,42,0.65))] dark:shadow-none">
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-300">
+                      {t.partsOfSpeech.studyFlow}
+                    </p>
+                    <h3 className="text-xl font-semibold text-slate-950 dark:text-white">{t.partsOfSpeech.studyFlowTitle}</h3>
+                    <ul className="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      <li><span className="font-semibold text-slate-950 dark:text-white">1. </span>{t.partsOfSpeech.studyFlowStep1}</li>
+                      <li><span className="font-semibold text-slate-950 dark:text-white">2. </span>{t.partsOfSpeech.studyFlowStep2}</li>
+                      <li><span className="font-semibold text-slate-950 dark:text-white">3. </span>{t.partsOfSpeech.studyFlowStep3}</li>
+                    </ul>
+                  </div>
+                </SectionCard>
+
+                <SectionCard className="border-slate-200/80 bg-white/95 shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                      {t.partsOfSpeech.whyThisHelps}
+                    </p>
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {t.partsOfSpeech.whyThisHelpsText}
+                    </p>
+                  </div>
+                </SectionCard>
+              </div>
+            </div>
+          </SectionCard>
+        </section>
+
+        <section className="space-y-4">
+          <SectionHeading
+            eyebrow={t.whyMatters.eyebrow}
+            title={t.whyMatters.title}
+            description={t.whyMatters.description}
           />
 
           <div className="grid gap-4 lg:grid-cols-3">
-            {whyItMatters.map((item) => (
+            {whyItMattersContent.map((item) => (
               <SectionCard key={item.title} className="h-full border-slate-200/80 bg-white/95 shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
                 <div className="space-y-3">
                   <h3 className="text-lg font-semibold text-slate-950 dark:text-white">{item.title}</h3>
@@ -376,13 +604,13 @@ export default function WordFormation() {
 
         <section id="patterns" className="space-y-4">
           <SectionHeading
-            eyebrow="Word Formation Patterns"
-            title="Learn the main categories that appear again and again"
-            description="These are some of the most useful patterns for changing meaning, changing word class, and recognizing how English builds new words."
+            eyebrow={t.patterns.eyebrow}
+            title={t.patterns.title}
+            description={t.patterns.description}
           />
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {patternGroups.map((group) => (
+            {patternGroupsContent.map((group) => (
               <SectionCard key={group.title} className="h-full border-slate-200/80 bg-white/95 shadow-[0_20px_45px_rgba(15,23,42,0.08)] dark:border-slate-800 dark:bg-slate-900/85 dark:shadow-none">
                 <div className="space-y-5">
                   <div className="space-y-2">
@@ -423,21 +651,21 @@ export default function WordFormation() {
 
         <section className="space-y-4">
           <SectionHeading
-            eyebrow="Learning Examples"
-            title="Study a few transformations and notice the logic"
-            description="These examples show how a base word can shift meaning, role, or form depending on what you want to say."
+            eyebrow={t.learningExamples.eyebrow}
+            title={t.learningExamples.title}
+            description={t.learningExamples.description}
           />
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {learningExamples.map((example) => (
+            {learningExamplesContent.map((example) => (
               <SectionCard key={`${example.base}-${example.transformation}`} className="h-full border-slate-200/80 bg-white/95 shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
                 <div className="space-y-4">
                   <div className="rounded-[20px] border border-cyan-100 bg-[linear-gradient(135deg,rgba(236,254,255,0.95),rgba(240,249,255,0.85))] p-4 dark:border-cyan-900 dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.4),rgba(15,23,42,0.65))]">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-300">
-                      Example
+                      {t.learningExamples.exampleLabel}
                     </p>
                     <p className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">{example.base}</p>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">becomes</p>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">{t.learningExamples.becomes}</p>
                     <p className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">{example.transformation}</p>
                   </div>
                   <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{example.lesson}</p>
@@ -450,19 +678,19 @@ export default function WordFormation() {
             <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
               <div className="space-y-3">
                 <span className="inline-flex rounded-full border border-cyan-200 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:border-cyan-900 dark:bg-slate-950/40 dark:text-cyan-200">
-                  Word family awareness
+                  {t.learningExamples.wordFamilyLabel}
                 </span>
-                <h3 className="text-xl font-semibold text-slate-950 dark:text-white">{wordFamily.root}</h3>
-                <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{wordFamily.explanation}</p>
+                <h3 className="text-xl font-semibold text-slate-950 dark:text-white">{wordFamilyContent.root}</h3>
+                <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{wordFamilyContent.explanation}</p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {wordFamily.members.map((member) => (
+                {wordFamilyContent.members.map((member) => (
                   <div
                     key={member}
                     className="rounded-[18px] border border-slate-200 bg-white/85 px-4 py-4 text-center shadow-sm dark:border-slate-800 dark:bg-slate-950/70"
                   >
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{wordFamily.root}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{wordFamilyContent.root}</p>
                     <p className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">{member}</p>
                   </div>
                 ))}
@@ -473,9 +701,9 @@ export default function WordFormation() {
 
         <section className="space-y-4">
           <SectionHeading
-            eyebrow="Mini Quiz"
-            title="Practice in short, focused sessions"
-            description="Use the mini quiz to study one topic at a time, avoid repetition, and build confidence through small review sessions."
+            eyebrow={t.quiz.eyebrow}
+            title={t.quiz.title}
+            description={t.quiz.description}
           />
 
           {quizView === 'topics' && (
@@ -484,37 +712,37 @@ export default function WordFormation() {
                 <div className="space-y-5">
                   <div className="space-y-2">
                     <span className="inline-flex rounded-full border border-cyan-200 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:border-cyan-900 dark:bg-slate-950/40 dark:text-cyan-200">
-                      Quick actions
+                      {t.quiz.quickActions}
                     </span>
-                    <h3 className="text-xl font-semibold text-slate-950 dark:text-white">Start a guided review</h3>
+                    <h3 className="text-xl font-semibold text-slate-950 dark:text-white">{t.quiz.quickActionsTitle}</h3>
                     <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Jump into a short quiz, focus on prefixes, or review word families without leaving the lesson flow.
+                      {t.quiz.quickActionsDescription}
                     </p>
                   </div>
 
                   <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                     <PrimaryButton className="w-full sm:w-auto" onClick={() => startQuiz('mixed_review', 'quick')}>
-                      Start Quick Quiz
+                      {t.quiz.startQuickQuiz}
                     </PrimaryButton>
                     <PrimaryButton
                       variant="secondary"
                       className="w-full sm:w-auto"
                       onClick={() => startQuiz('prefixes', 'quick')}
                     >
-                      Practice Prefixes
+                      {t.quiz.practicePrefixes}
                     </PrimaryButton>
                     <PrimaryButton
                       variant="secondary"
                       className="w-full sm:w-auto"
                       onClick={() => startQuiz('word_families', 'quick')}
                     >
-                      Practice Word Families
+                      {t.quiz.practiceWordFamilies}
                     </PrimaryButton>
                     <PrimaryButton
                       className="w-full border border-cyan-300 bg-cyan-50 text-cyan-900 hover:bg-cyan-100 dark:border-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-100 sm:w-auto"
                       onClick={() => startQuiz('mixed_review', 'challenge')}
                     >
-                      Challenge Mode
+                      {t.quiz.challengeMode}
                     </PrimaryButton>
                   </div>
                 </div>
@@ -524,16 +752,16 @@ export default function WordFormation() {
                 <div className="space-y-5">
                   <div className="space-y-2">
                     <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
-                      Topic selection
+                      {t.quiz.topicSelection}
                     </span>
-                    <h3 className="text-xl font-semibold text-slate-950 dark:text-white">Study by topic</h3>
+                    <h3 className="text-xl font-semibold text-slate-950 dark:text-white">{t.quiz.studyByTopic}</h3>
                     <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Choose a quiz mode first, then start a topic card. Recent questions are filtered out automatically when possible.
+                      {t.quiz.studyByTopicDescription}
                     </p>
                   </div>
 
                   <div className="grid gap-3 md:grid-cols-3">
-                    {quizModes.map((mode) => {
+                    {quizModeOptions.map((mode) => {
                       const isSelected = selectedModeId === mode.id;
 
                       return (
@@ -607,24 +835,23 @@ export default function WordFormation() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-300">
-                Final CTA
+                {t.finalCta.eyebrow}
               </p>
               <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
-                Turn pattern awareness into everyday vocabulary growth
+                {t.finalCta.title}
               </h2>
               <p className="text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
-                Revisit these formations, notice them in reading, and practice using the right word form when you
-                speak or write.
+                {t.finalCta.description}
               </p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link to="/practice">
-                <PrimaryButton className="w-full sm:w-auto">Practice With ReSpeako</PrimaryButton>
+                <PrimaryButton className="w-full sm:w-auto">{t.finalCta.primaryButton}</PrimaryButton>
               </Link>
               <Link to="/learning">
                 <PrimaryButton variant="secondary" className="w-full sm:w-auto">
-                  Back to Learning Hub
+                  {t.finalCta.secondaryButton}
                 </PrimaryButton>
               </Link>
             </div>
