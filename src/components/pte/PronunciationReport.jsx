@@ -202,6 +202,7 @@ export default function PronunciationReport({ audioBlob, referenceText, source, 
             </div>
           )}
           <p className="text-xs text-gray-500 dark:text-gray-400">{t.phonemeHint}</p>
+          <Link to="/pronunciation" className="text-xs font-medium text-cyan-700 underline dark:text-cyan-300">{t.openCoach}</Link>
         </div>
       )}
 

@@ -139,7 +139,7 @@ const learningModules = [
   {
     title: 'Pronunciation',
     description: 'Train your ear and your voice so the words you know sound confident when you say them.',
-    comingSoon: true,
+    href: '/pronunciation',
     accent: 'from-fuchsia-500/15 to-pink-500/10',
   },
   {

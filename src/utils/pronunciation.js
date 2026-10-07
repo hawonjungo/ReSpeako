@@ -1,6 +1,7 @@
 // Client for the owner-only pronunciation Worker (Azure Pronunciation Assessment).
 import { Capacitor } from '@capacitor/core';
 import { decodeToPcm16k, encodeWav, splitAtPauses } from './wav';
+import { recordPhonemeScores } from './phonemeStats';
 
 const ENDPOINT_KEY = 'respeako_pron_endpoint';
 const TOKEN_KEY = 'respeako_pron_token';
@@ -255,5 +256,8 @@ export async function assessPronunciation({ blob, referenceText = '' }) {
     usage = body.usage;
   }
 
-  return { report: mergeReports(reports), usage, truncated };
+  const report = mergeReports(reports);
+  // Every assessment feeds the per-sound stats used by the Pronunciation Coach.
+  recordPhonemeScores(report).catch(() => undefined);
+  return { report, usage, truncated };
 }

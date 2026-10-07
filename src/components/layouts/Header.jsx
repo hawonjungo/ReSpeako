@@ -40,6 +40,7 @@ const Header = () => {
             '/pte/listening/lfib': '⌨️',
             '/pte/listening/smw': '🔔',
             '/pte/listening/hcs': '🎯',
+            '/pronunciation': '👄',
         };
         return iconMap[pathname] || '🎙️'; // Default to microphone icon
     };

@@ -26,6 +26,7 @@ const OpenSpeakingPractice = lazy(() => import('./components/pte/OpenSpeakingPra
 const MockTest = lazy(() => import('./components/pte/MockTest'))
 const ObjectivePractice = lazy(() => import('./components/pte/ObjectivePractice'))
 const WritingPractice = lazy(() => import('./components/pte/writing/WritingPractice'))
+const PronunciationCoach = lazy(() => import('./components/pronunciation/PronunciationCoach'))
 
 function PageLoading() {
   return (
@@ -70,6 +71,7 @@ function App() {
               <Route path="/pte/writing/swt" element={<WritingPractice key="swt" task="swt" />} />
               <Route path="/pte/writing/essay" element={<WritingPractice key="essay" task="essay" />} />
               <Route path="/pte/writing/sst" element={<WritingPractice key="sst" task="sst" />} />
+              <Route path="/pronunciation" element={<PronunciationCoach />} />
             </Routes>
             </Suspense>
             <CatPawBtn />
