@@ -1,0 +1,1 @@
+function a({frequency:c=880,duration:r=.3}={}){return new Promise(n=>{const o=window.AudioContext||window.webkitAudioContext;if(!o){n();return}const t=new o,e=t.createOscillator(),i=t.createGain();e.frequency.value=c,i.gain.setValueAtTime(.2,t.currentTime),e.connect(i).connect(t.destination),e.start(),e.stop(t.currentTime+r),e.onended=()=>{t.close(),n()}})}export{a as p};
