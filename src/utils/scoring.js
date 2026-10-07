@@ -218,3 +218,64 @@ export function scoreSpeaking(referenceText, transcript, speakingSeconds) {
     overall: spokenWords === 0 ? 10 : toPteScale(contentFactor * 0.6 + fluencyFactor * 0.4),
   };
 }
+
+// A single-word keyword also matches longer forms ("increas" -> increased, increasing).
+const MIN_PREFIX_MATCH = 4;
+
+function containsPhrase(tokens, phrase) {
+  const words = tokenizeWords(phrase);
+  if (words.length === 0) return false;
+
+  if (words.length === 1) {
+    const [word] = words;
+    return tokens.some((token) => token === word || (word.length >= MIN_PREFIX_MATCH && token.startsWith(word)));
+  }
+
+  for (let i = 0; i + words.length <= tokens.length; i += 1) {
+    if (words.every((word, offset) => tokens[i + offset] === word)) return true;
+  }
+  return false;
+}
+
+/**
+ * Check which key ideas a free answer mentions. Each group lists accepted
+ * alternatives, e.g. { label: 'rise', any: ['increas', 'rise', 'rose', 'grew', 'went up'] }.
+ */
+export function matchKeyIdeas(transcript, groups) {
+  const tokens = tokenizeWords(transcript);
+  const matched = [];
+  const missed = [];
+  groups.forEach((group) => {
+    (group.any.some((phrase) => containsPhrase(tokens, phrase)) ? matched : missed).push(group.label);
+  });
+  return { matched, missed };
+}
+
+// Answers much shorter than this cannot cover a 40-second task well.
+const OPEN_TASK_MIN_WORDS = 50;
+
+/**
+ * Rough PTE-style estimate for Describe Image / Retell Lecture: content from
+ * key ideas covered (scaled down for very short answers) plus fluency from pace.
+ */
+export function scoreOpenSpeaking(transcript, groups, speakingSeconds) {
+  const wordCount = tokenizeWords(transcript).length;
+  const { matched, missed } = matchKeyIdeas(transcript, groups);
+  const coverage = groups.length === 0 ? 0 : matched.length / groups.length;
+  const lengthFactor = Math.min(1, wordCount / OPEN_TASK_MIN_WORDS);
+  const contentFactor = coverage * (0.5 + 0.5 * lengthFactor);
+  const fluencyFactor = getFluencyFactor(wordCount, speakingSeconds);
+  const toPteScale = (factor) => Math.round(10 + 80 * factor);
+
+  return {
+    matched,
+    missed,
+    wordCount,
+    correct: matched.length,
+    total: groups.length,
+    wpm: speakingSeconds > 0 ? Math.round((wordCount / speakingSeconds) * 60) : 0,
+    content: toPteScale(contentFactor),
+    fluency: toPteScale(fluencyFactor),
+    overall: wordCount === 0 ? 10 : toPteScale(contentFactor * 0.5 + fluencyFactor * 0.5),
+  };
+}

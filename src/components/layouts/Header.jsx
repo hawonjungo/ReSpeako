@@ -26,6 +26,8 @@ const Header = () => {
             '/pte/repeat-sentence': '🔁',
             '/pte/read-aloud': '📖',
             '/settings': '⚙️',
+            '/pte/describe-image': '📊',
+            '/pte/retell-lecture': '🎧',
         };
         return iconMap[pathname] || '🎙️'; // Default to microphone icon
     };

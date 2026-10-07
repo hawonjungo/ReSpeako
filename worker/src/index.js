@@ -103,7 +103,8 @@ async function handleAssess(request, env, cors) {
   } catch {
     return json({ error: 'invalid_reference' }, 400, cors);
   }
-  if (!referenceText || referenceText.length > MAX_REFERENCE_CHARS) {
+  // No reference text = unscripted assessment (free speaking, e.g. Describe Image).
+  if (referenceText.length > MAX_REFERENCE_CHARS) {
     return json({ error: 'invalid_reference' }, 400, cors);
   }
 
@@ -121,15 +122,18 @@ async function handleAssess(request, env, cors) {
     return json({ error: 'monthly_limit_reached', usage }, 429, cors);
   }
 
-  const assessment = encodeBase64Utf8(JSON.stringify({
-    ReferenceText: referenceText,
+  const config = {
     GradingSystem: 'HundredMark',
     Granularity: 'Phoneme',
     Dimension: 'Comprehensive',
-    EnableMiscue: 'True',
     EnableProsodyAssessment: 'True',
     PhonemeAlphabet: 'IPA',
-  }));
+  };
+  if (referenceText) {
+    config.ReferenceText = referenceText;
+    config.EnableMiscue = 'True';
+  }
+  const assessment = encodeBase64Utf8(JSON.stringify(config));
 
   const azureResponse = await fetch(getAzureUrl(env), {
     method: 'POST',

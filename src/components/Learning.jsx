@@ -23,6 +23,18 @@ const learningModules = [
     accent: 'from-blue-500/15 to-cyan-500/10',
   },
   {
+    title: 'Describe Image',
+    description: 'Charts drawn in the app: 25 seconds to study, 40 to describe, scored on key ideas and pace.',
+    href: '/pte/describe-image',
+    accent: 'from-emerald-500/15 to-teal-500/10',
+  },
+  {
+    title: 'Retell Lecture',
+    description: 'Hear a short academic lecture once, take notes, and retell the main points in 40 seconds.',
+    href: '/pte/retell-lecture',
+    accent: 'from-fuchsia-500/15 to-violet-500/10',
+  },
+  {
     title: 'Review Notebook',
     description: 'Your missed words and sentences return on a spaced-repetition schedule so they stick for good.',
     href: '/review',

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { alignWords, getTextSimilarityScore, normalizeText, scoreDictation, scoreSpeaking } from './scoring';
+import {
+  alignWords, getTextSimilarityScore, matchKeyIdeas, normalizeText, scoreDictation, scoreOpenSpeaking, scoreSpeaking,
+} from './scoring';
 
 describe('normalizeText', () => {
   it('lowercases, strips punctuation and collapses spaces', () => {
@@ -73,5 +75,40 @@ describe('scoreSpeaking', () => {
     expect(scoreSpeaking('one two three four', 'one two three', 2).contentBand).toBe(2);
     expect(scoreSpeaking('one two three four', 'one', 1).contentBand).toBe(1);
     expect(scoreSpeaking('one two three four', '', 0).overall).toBe(10);
+  });
+});
+
+describe('matchKeyIdeas', () => {
+  const groups = [
+    { label: 'electric cars', any: ['electric'] },
+    { label: 'rise', any: ['increas', 'rise', 'rose', 'grew', 'went up'] },
+    { label: '2025', any: ['2025', 'twenty twenty five'] },
+  ];
+
+  it('accepts word forms and multi-word alternatives', () => {
+    expect(matchKeyIdeas('Sales of electric cars went up a lot', groups).matched).toEqual(['electric cars', 'rise']);
+    expect(matchKeyIdeas('It increased sharply by twenty twenty five', groups).matched).toEqual(['rise', '2025']);
+  });
+
+  it('does not match short words inside other words', () => {
+    expect(matchKeyIdeas('the price was precise', [{ label: 'rise', any: ['rise'] }]).matched).toEqual([]);
+  });
+});
+
+describe('scoreOpenSpeaking', () => {
+  const groups = [{ label: 'a', any: ['alpha'] }, { label: 'b', any: ['beta'] }];
+  const longAnswer = `alpha beta ${'word '.repeat(58)}`.trim(); // 60 words
+
+  it('gives full marks for full coverage at a natural pace', () => {
+    // 60 words in 30 s = 120 wpm.
+    expect(scoreOpenSpeaking(longAnswer, groups, 30)).toMatchObject({ content: 90, fluency: 90, overall: 90 });
+  });
+
+  it('scales content down for very short answers', () => {
+    expect(scoreOpenSpeaking('alpha beta', groups, 1).content).toBeLessThan(60);
+  });
+
+  it('scores silence as the minimum', () => {
+    expect(scoreOpenSpeaking('', groups, 0).overall).toBe(10);
   });
 });

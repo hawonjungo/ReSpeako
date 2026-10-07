@@ -1,12 +1,14 @@
 // Client for the owner-only pronunciation Worker (Azure Pronunciation Assessment).
 import { Capacitor } from '@capacitor/core';
-import { convertToWav16k } from './wav';
+import { decodeToPcm16k, encodeWav, splitAtPauses } from './wav';
 
 const ENDPOINT_KEY = 'respeako_pron_endpoint';
 const TOKEN_KEY = 'respeako_pron_token';
 const ENGINE_KEY = 'respeako_speaking_engine';
 const TICKS_PER_SECOND = 10_000_000; // Azure offsets are in 100 ns units.
 const MAX_ASSESS_SECONDS = 30;
+// Free speaking (no reference) can be split into 30 s chunks, so allow longer answers.
+const MAX_UNSCRIPTED_SECONDS = 60;
 export const WEAK_WORD_THRESHOLD = 60;
 
 export class PronunciationError extends Error {
@@ -202,18 +204,56 @@ export function describeWeakSounds(word, threshold = WEAK_WORD_THRESHOLD) {
     .join(' ');
 }
 
-/** Convert a recording and score it against the reference text. */
-export async function assessPronunciation({ blob, referenceText }) {
-  if (!blob) throw new PronunciationError('no_audio');
-  const { wav, truncated } = await convertToWav16k(blob, MAX_ASSESS_SECONDS);
-  const body = await callWorker('/assess', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'audio/wav',
-      'X-Reference-Text': encodeBase64Utf8(referenceText),
-    },
-    body: wav,
+const SCORE_KEYS = ['accuracy', 'fluency', 'completeness', 'prosody', 'pronunciation'];
+
+/** Combine reports from consecutive audio chunks into one, weighting scores by speaking time. */
+export function mergeReports(reports) {
+  const successful = reports.filter((report) => report.status === 'Success');
+  if (successful.length === 0) return reports[0] || { status: 'Error', words: [] };
+  if (successful.length === 1) return successful[0];
+
+  const weightOf = (report) => report.speechSeconds || report.words.length || 1;
+  const merged = {
+    status: 'Success',
+    recognizedText: successful.map((report) => report.recognizedText).join(' ').trim(),
+    lexicalText: successful.map((report) => report.lexicalText).join(' ').trim(),
+    speechSeconds: successful.reduce((sum, report) => sum + (report.speechSeconds || 0), 0),
+    words: successful.flatMap((report) => report.words),
+  };
+
+  SCORE_KEYS.forEach((key) => {
+    const scored = successful.filter((report) => typeof report[key] === 'number');
+    const totalWeight = scored.reduce((sum, report) => sum + weightOf(report), 0);
+    merged[key] = totalWeight === 0 ? null : Math.round(
+      scored.reduce((sum, report) => sum + report[key] * weightOf(report), 0) / totalWeight
+    );
   });
 
-  return { report: parseAzureResult(body.result), usage: body.usage, truncated };
+  return merged;
+}
+
+/**
+ * Convert a recording and score it. With reference text it is a scripted
+ * assessment (max 30 s); without, an unscripted one split at pauses.
+ */
+export async function assessPronunciation({ blob, referenceText = '' }) {
+  if (!blob) throw new PronunciationError('no_audio');
+  const scripted = Boolean(referenceText.trim());
+  const { samples, truncated } = await decodeToPcm16k(
+    blob,
+    scripted ? MAX_ASSESS_SECONDS : MAX_UNSCRIPTED_SECONDS
+  );
+  const chunks = scripted ? [{ samples }] : splitAtPauses(samples, MAX_ASSESS_SECONDS);
+
+  const reports = [];
+  let usage = null;
+  for (const chunk of chunks) {
+    const headers = { 'Content-Type': 'audio/wav' };
+    if (scripted) headers['X-Reference-Text'] = encodeBase64Utf8(referenceText);
+    const body = await callWorker('/assess', { method: 'POST', headers, body: encodeWav(chunk.samples) });
+    reports.push(parseAzureResult(body.result));
+    usage = body.usage;
+  }
+
+  return { report: mergeReports(reports), usage, truncated };
 }

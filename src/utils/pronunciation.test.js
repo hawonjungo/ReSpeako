@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { encodeWav } from './wav';
+import { encodeWav, splitAtPauses } from './wav';
 import {
   describeWeakSounds,
   resolveSpeakingEngine,
   getIpaPageSymbol,
   getWeakWords,
+  mergeReports,
   parseAzureResult,
   toIpa,
 } from './pronunciation';
@@ -111,5 +112,55 @@ describe('encodeWav', () => {
     expect(view.getUint32(24, true)).toBe(16000);
     expect(view.getUint16(22, true)).toBe(1);
     expect(view.getInt16(44 + 6, true)).toBe(0x7fff);
+  });
+});
+
+describe('splitAtPauses', () => {
+  const rate = 1000; // Small sample rate keeps the test arrays tiny.
+
+  it('keeps short audio in one chunk', () => {
+    const chunks = splitAtPauses(new Float32Array(20 * rate), 30, rate);
+    expect(chunks).toHaveLength(1);
+  });
+
+  it('cuts long audio at the quietest point near the middle', () => {
+    const samples = new Float32Array(40 * rate).fill(0.5);
+    samples.fill(0, 21 * rate, 21.5 * rate); // a pause at 21 s
+    const chunks = splitAtPauses(samples, 30, rate);
+
+    expect(chunks).toHaveLength(2);
+    expect(chunks[1].startSeconds).toBeGreaterThan(21);
+    expect(chunks[1].startSeconds).toBeLessThan(21.5);
+    chunks.forEach((chunk) => expect(chunk.samples.length).toBeLessThanOrEqual(30 * rate));
+    expect(chunks[0].samples.length + chunks[1].samples.length).toBe(40 * rate);
+  });
+});
+
+describe('mergeReports', () => {
+  const chunk = (text, seconds, accuracy) => ({
+    status: 'Success',
+    recognizedText: text,
+    lexicalText: text.toLowerCase(),
+    speechSeconds: seconds,
+    accuracy,
+    fluency: 80,
+    completeness: null,
+    prosody: 70,
+    pronunciation: accuracy,
+    words: [{ word: text, accuracy, errorType: 'None', phonemes: [] }],
+  });
+
+  it('joins text and weights scores by speaking time', () => {
+    const merged = mergeReports([chunk('First part', 30, 90), chunk('Second', 10, 50)]);
+    expect(merged.lexicalText).toBe('first part second');
+    expect(merged.speechSeconds).toBe(40);
+    expect(merged.accuracy).toBe(80);
+    expect(merged.completeness).toBeNull();
+    expect(merged.words).toHaveLength(2);
+  });
+
+  it('ignores chunks Azure could not recognise', () => {
+    const merged = mergeReports([chunk('Only', 12, 70), { status: 'InitialSilenceTimeout', words: [] }]);
+    expect(merged.lexicalText).toBe('only');
   });
 });

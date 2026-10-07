@@ -1,0 +1,219 @@
+// Describe Image and Retell Lecture practice content written for ReSpeako.
+// Chart data is illustrative, not real statistics.
+// keyIdeas: what a good answer mentions; each `any` lists accepted wordings.
+
+const RISE = ['increas', 'rise', 'rose', 'risen', 'grew', 'grow', 'went up', 'climb', 'surg', 'upward'];
+const FALL = ['decreas', 'fall', 'fell', 'drop', 'declin', 'went down', 'downward'];
+const HIGHEST = ['highest', 'most', 'largest', 'biggest', 'greatest', 'peak', 'maximum', 'top'];
+const LOWEST = ['lowest', 'least', 'smallest', 'fewest', 'minimum', 'bottom'];
+const OVERALL = ['overall', 'in conclusion', 'in general', 'to conclude', 'in summary', 'to sum up'];
+
+export const describeImageBank = [
+  {
+    id: 'di-001',
+    type: 'bar',
+    title: 'Average weekly study hours by faculty',
+    unit: 'hours',
+    data: [
+      { label: 'Medicine', value: 32 },
+      { label: 'Engineering', value: 28 },
+      { label: 'Law', value: 25 },
+      { label: 'Business', value: 20 },
+      { label: 'Arts', value: 18 },
+    ],
+    keyIdeas: [
+      { label: 'study hours', any: ['study', 'hours'] },
+      { label: 'faculty', any: ['facult', 'subject', 'department', 'field'] },
+      { label: 'Medicine', any: ['medicine', 'medical'] },
+      { label: 'highest', any: HIGHEST },
+      { label: 'Arts', any: ['arts', 'art'] },
+      { label: 'lowest', any: LOWEST },
+      { label: '32', any: ['32', 'thirty two'] },
+      { label: 'overall', any: OVERALL },
+    ],
+    sample: 'The bar chart illustrates the average number of hours students spend studying each week in five faculties. Medicine students study the most, at about thirty-two hours per week, followed by Engineering with twenty-eight and Law with twenty-five. Business students study around twenty hours, while Arts students study the least, at roughly eighteen hours. Overall, students in science-based faculties tend to study considerably longer than those in Arts and Business.',
+  },
+  {
+    id: 'di-002',
+    type: 'line',
+    title: 'Electric car sales, 2018-2025 (thousands)',
+    unit: 'thousand',
+    data: [
+      { label: '2018', value: 20 },
+      { label: '2019', value: 35 },
+      { label: '2020', value: 50 },
+      { label: '2021', value: 90 },
+      { label: '2022', value: 150 },
+      { label: '2023', value: 240 },
+      { label: '2024', value: 310 },
+      { label: '2025', value: 400 },
+    ],
+    keyIdeas: [
+      { label: 'electric cars', any: ['electric', 'ev'] },
+      { label: 'sales', any: ['sale', 'sold', 'purchase'] },
+      { label: 'rise', any: RISE },
+      { label: '2018', any: ['2018', 'twenty eighteen', 'two thousand eighteen', 'two thousand and eighteen'] },
+      { label: '2025', any: ['2025', 'twenty twenty five', 'two thousand twenty five', 'two thousand and twenty five'] },
+      { label: '400', any: ['400', 'four hundred'] },
+      { label: 'rapid growth', any: ['sharp', 'rapid', 'dramatic', 'significant', 'steep', 'considerabl'] },
+      { label: 'overall', any: OVERALL },
+    ],
+    sample: 'The line graph shows electric car sales between 2018 and 2025, measured in thousands. In 2018, sales were only about twenty thousand. They rose gradually to fifty thousand in 2020, and then increased sharply, reaching two hundred and forty thousand in 2023. By 2025, sales had climbed to around four hundred thousand. Overall, electric car sales grew dramatically over the period, especially after 2020.',
+  },
+  {
+    id: 'di-003',
+    type: 'pie',
+    title: 'Household energy use by purpose',
+    unit: '%',
+    data: [
+      { label: 'Heating', value: 42 },
+      { label: 'Appliances', value: 25 },
+      { label: 'Water heating', value: 18 },
+      { label: 'Lighting', value: 8 },
+      { label: 'Cooking', value: 7 },
+    ],
+    keyIdeas: [
+      { label: 'energy use', any: ['energy', 'electricity', 'power'] },
+      { label: 'household', any: ['household', 'home', 'house'] },
+      { label: 'heating', any: ['heating', 'heat'] },
+      { label: 'largest share', any: HIGHEST },
+      { label: 'cooking', any: ['cooking', 'cook'] },
+      { label: 'smallest share', any: LOWEST },
+      { label: 'percent', any: ['percent', 'per cent', '%', 'proportion', 'share', 'quarter'] },
+      { label: 'overall', any: OVERALL },
+    ],
+    sample: 'The pie chart illustrates how household energy is used for different purposes. Heating accounts for the largest share, at forty-two percent. Appliances make up about a quarter, at twenty-five percent, while water heating represents eighteen percent. Lighting and cooking use the smallest proportions, at eight and seven percent respectively. Overall, heating is by far the biggest consumer of energy in the home.',
+  },
+  {
+    id: 'di-004',
+    type: 'bar',
+    title: 'University library visitors by month (thousands)',
+    unit: 'thousand',
+    data: [
+      { label: 'Jan', value: 12 },
+      { label: 'Feb', value: 18 },
+      { label: 'Mar', value: 22 },
+      { label: 'Apr', value: 26 },
+      { label: 'May', value: 35 },
+      { label: 'Jun', value: 9 },
+    ],
+    keyIdeas: [
+      { label: 'library', any: ['library'] },
+      { label: 'visitors', any: ['visitor', 'visit', 'students', 'people', 'users'] },
+      { label: 'May', any: ['may'] },
+      { label: 'peak', any: [...HIGHEST, 'exam'] },
+      { label: 'June', any: ['june'] },
+      { label: 'lowest', any: [...LOWEST, ...FALL] },
+      { label: 'rise', any: RISE },
+      { label: 'overall', any: OVERALL },
+    ],
+    sample: 'The bar chart shows the number of visitors to a university library from January to June. Visitor numbers rose steadily from twelve thousand in January to twenty-six thousand in April, and peaked at thirty-five thousand in May, probably because of final exams. However, the figure dropped sharply to just nine thousand in June, the lowest point. Overall, library use increased throughout the semester before falling at the end.',
+  },
+  {
+    id: 'di-005',
+    type: 'line',
+    title: 'Average monthly temperature in a coastal city (°C)',
+    unit: '°C',
+    data: [
+      { label: 'Jan', value: 8 },
+      { label: 'Mar', value: 12 },
+      { label: 'May', value: 19 },
+      { label: 'Jul', value: 27 },
+      { label: 'Sep', value: 22 },
+      { label: 'Nov', value: 12 },
+    ],
+    keyIdeas: [
+      { label: 'temperature', any: ['temperature', 'degree', 'celsius', 'warm', 'cold'] },
+      { label: 'city', any: ['city', 'coastal'] },
+      { label: 'July', any: ['july', 'summer'] },
+      { label: 'highest', any: HIGHEST },
+      { label: 'January', any: ['january', 'winter'] },
+      { label: 'lowest', any: LOWEST },
+      { label: 'rise then fall', any: [...RISE, ...FALL] },
+      { label: 'overall', any: OVERALL },
+    ],
+    sample: 'The line graph illustrates the average monthly temperature in a coastal city. In January, the temperature is at its lowest, at about eight degrees Celsius. It then rises steadily through spring and peaks at twenty-seven degrees in July. After that, it falls to twenty-two degrees in September and twelve degrees in November. Overall, the city has warm summers and cool winters, with a clear seasonal pattern.',
+  },
+];
+
+export const retellLectureBank = [
+  {
+    id: 'rl-001',
+    title: 'Why we sleep',
+    text: 'Today I want to talk about why sleep matters for students. Many students believe that staying up late to study is a good strategy before an exam. However, research shows the opposite. During sleep, especially deep sleep, the brain transfers new information from short-term memory into long-term memory. Without enough sleep, this process is interrupted, so students actually remember less. Lack of sleep also reduces concentration and makes it harder to solve problems. So the main message is simple: if you want better results, plan your study time earlier and protect your sleep.',
+    keyIdeas: [
+      { label: 'sleep', any: ['sleep'] },
+      { label: 'students', any: ['student'] },
+      { label: 'staying up late', any: ['late', 'all night', 'stay up', 'staying up'] },
+      { label: 'memory', any: ['memor', 'remember'] },
+      { label: 'long-term', any: ['long term', 'long-term'] },
+      { label: 'concentration', any: ['concentrat', 'focus', 'attention'] },
+      { label: 'research', any: ['research', 'studies', 'study shows', 'evidence'] },
+      { label: 'plan earlier', any: ['plan', 'earlier', 'schedule'] },
+    ],
+    sample: 'The speaker discussed why sleep is important for students. Although many students stay up late before exams, research shows this is counterproductive. During deep sleep, the brain moves new information from short-term to long-term memory, so a lack of sleep means students remember less. It also reduces concentration and problem-solving ability. In conclusion, the lecturer advised students to plan their study earlier and protect their sleep.',
+  },
+  {
+    id: 'rl-002',
+    title: 'Urban heat islands',
+    text: 'Let us look at a phenomenon called the urban heat island. Cities are often several degrees warmer than the surrounding countryside. There are a few reasons for this. First, materials such as concrete and asphalt absorb heat during the day and release it slowly at night. Second, cities have fewer trees and less vegetation, which normally cool the air. Third, vehicles, factories and air conditioners produce additional heat. The effect is not only uncomfortable; it increases energy use and can be dangerous during heatwaves. Planting trees and using reflective roofs are two effective solutions.',
+    keyIdeas: [
+      { label: 'urban heat island', any: ['heat island', 'urban heat'] },
+      { label: 'cities warmer', any: ['warmer', 'hotter', 'higher temperature'] },
+      { label: 'countryside', any: ['countryside', 'rural', 'surrounding'] },
+      { label: 'concrete / asphalt', any: ['concrete', 'asphalt', 'material', 'absorb'] },
+      { label: 'fewer trees', any: ['tree', 'vegetation', 'green'] },
+      { label: 'vehicles and factories', any: ['vehicle', 'car', 'factor', 'air condition'] },
+      { label: 'energy / heatwaves', any: ['energy', 'heatwave', 'heat wave', 'dangerous'] },
+      { label: 'solutions', any: ['solution', 'planting', 'reflective', 'roof'] },
+    ],
+    sample: 'The lecture was about the urban heat island effect, where cities are several degrees warmer than the surrounding countryside. The speaker gave three reasons: concrete and asphalt absorb heat and release it at night, cities have fewer trees to cool the air, and vehicles, factories and air conditioners produce extra heat. This increases energy use and can be dangerous during heatwaves. Finally, the speaker suggested planting trees and using reflective roofs as solutions.',
+  },
+  {
+    id: 'rl-003',
+    title: 'The history of the bicycle',
+    text: 'The bicycle has a surprisingly long history. The first version, built in Germany in 1817, had no pedals at all; riders pushed themselves along with their feet. Pedals were added in the 1860s, but early bicycles had a huge front wheel, which made them fast but dangerous. The so-called safety bicycle of the 1880s, with two wheels of equal size and a chain, became the model we still use today. Bicycles gave ordinary people, and especially women, a new kind of freedom to travel independently, and they played an important role in social change.',
+    keyIdeas: [
+      { label: 'bicycle history', any: ['bicycle', 'bike', 'history'] },
+      { label: 'Germany', any: ['germany', 'german'] },
+      { label: '1817', any: ['1817', 'eighteen seventeen', 'nineteenth century', '19th century'] },
+      { label: 'no pedals', any: ['pedal'] },
+      { label: 'big front wheel', any: ['front wheel', 'large wheel', 'big wheel', 'huge', 'dangerous'] },
+      { label: 'safety bicycle', any: ['safety', 'chain', 'equal'] },
+      { label: 'freedom', any: ['freedom', 'independen', 'travel'] },
+      { label: 'women / social change', any: ['women', 'woman', 'social', 'society'] },
+    ],
+    sample: 'The lecture described the history of the bicycle. The first version appeared in Germany in 1817 and had no pedals. Pedals were added in the 1860s, but those bicycles had a huge front wheel that made them dangerous. In the 1880s the safety bicycle, with equal wheels and a chain, became the modern design. The speaker concluded that bicycles gave ordinary people, especially women, new freedom to travel and contributed to social change.',
+  },
+  {
+    id: 'rl-004',
+    title: 'Bees and food production',
+    text: 'Most people think of bees as producers of honey, but their most valuable contribution is pollination. When bees move from flower to flower, they carry pollen, which allows plants to produce fruit and seeds. Around one third of the food we eat depends on pollinators like bees, including apples, almonds and many vegetables. Unfortunately, bee populations have declined in many countries. The main causes are pesticides, the loss of natural habitats and disease. Scientists argue that protecting wildflower areas and reducing pesticide use are essential for future food security.',
+    keyIdeas: [
+      { label: 'bees', any: ['bee'] },
+      { label: 'pollination', any: ['pollinat', 'pollen'] },
+      { label: 'one third of food', any: ['one third', 'a third', 'third', 'food'] },
+      { label: 'fruit examples', any: ['apple', 'almond', 'fruit', 'vegetable'] },
+      { label: 'decline', any: FALL },
+      { label: 'pesticides', any: ['pesticide', 'chemical'] },
+      { label: 'habitat loss / disease', any: ['habitat', 'disease'] },
+      { label: 'food security', any: ['security', 'protect', 'wildflower'] },
+    ],
+    sample: 'The speaker explained that the most important role of bees is pollination rather than honey. By carrying pollen between flowers, bees allow plants to produce fruit and seeds, and around one third of our food, such as apples and almonds, depends on them. However, bee populations are declining because of pesticides, habitat loss and disease. The lecturer concluded that protecting wildflower areas and reducing pesticides are essential for food security.',
+  },
+];
+
+// Reusable answer frames shown as hints.
+export const describeImageTemplate = [
+  'The [chart type] illustrates [title].',
+  'The highest figure is [item], at [number], whereas the lowest is [item], at [number].',
+  '[Item] is followed by [item] and [item].',
+  'Overall, [main trend or comparison].',
+];
+
+export const retellLectureTemplate = [
+  'The speaker discussed [topic].',
+  'First, the speaker explained that [key point 1].',
+  'The speaker also mentioned that [key point 2], for example [detail].',
+  'In conclusion, the lecturer said that [main message].',
+];

@@ -19,6 +19,7 @@ import Review from './components/Review'
 import RepeatSentence from './components/pte/RepeatSentence'
 import ReadAloud from './components/pte/ReadAloud'
 import Settings from './components/Settings'
+import OpenSpeakingPractice from './components/pte/OpenSpeakingPractice'
 
 function App() {
   return (
@@ -42,6 +43,8 @@ function App() {
               <Route path="/pte/repeat-sentence" element={<RepeatSentence />} />
               <Route path="/pte/read-aloud" element={<ReadAloud />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/pte/describe-image" element={<OpenSpeakingPractice key="di" task="di" />} />
+              <Route path="/pte/retell-lecture" element={<OpenSpeakingPractice key="rl" task="rl" />} />
             </Routes>
             <CatPawBtn />
           </div>

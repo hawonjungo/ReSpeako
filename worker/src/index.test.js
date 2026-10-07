@@ -46,7 +46,7 @@ function assessRequest({ token = TOKEN, origin = ORIGIN, body = createWav(2), re
   const headers = { 'Content-Type': 'audio/wav' };
   if (token) headers.Authorization = `Bearer ${token}`;
   if (origin) headers.Origin = origin;
-  if (reference !== null) headers['X-Reference-Text'] = btoa(reference);
+  if (reference) headers['X-Reference-Text'] = btoa(reference);
   return new Request('https://worker.example/assess', { method: 'POST', headers, body });
 }
 
@@ -106,6 +106,14 @@ describe('pronunciation worker', () => {
     expect(url).toContain('southeastasia.stt.speech.microsoft.com');
     expect(init.headers['Ocp-Apim-Subscription-Key']).toBe('azure-key');
     expect(JSON.parse(atob(init.headers['Pronunciation-Assessment'])).ReferenceText).toBe('Good morning');
+  });
+
+  it('runs an unscripted assessment when no reference text is sent', async () => {
+    const response = await worker.fetch(assessRequest({ reference: '' }), createEnv());
+    expect(response.status).toBe(200);
+    const config = JSON.parse(atob(azureFetch.mock.calls[0][1].headers['Pronunciation-Assessment']));
+    expect(config.ReferenceText).toBeUndefined();
+    expect(config.EnableMiscue).toBeUndefined();
   });
 
   it('stops at the monthly limit', async () => {
