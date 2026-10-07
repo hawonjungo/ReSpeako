@@ -5,7 +5,7 @@ import { translations } from '../../i18n/translations';
 import { writeFromDictationBank } from '../../data/pte/writeFromDictation';
 import useTextToSpeech from '../../hooks/useTextToSpeech';
 import { scoreDictation } from '../../utils/scoring';
-import { addReviewItems, logAttempt } from '../../utils/reviewStore';
+import { getDictationReviewItems, recordAnswer } from '../../utils/practiceRecords';
 import shuffleArray from '../../utils/shuffleArray';
 import formatMessage from '../../utils/formatMessage';
 import PageContainer from '../ui/PageContainer';
@@ -16,11 +16,6 @@ import WordDiff, { WordDiffLegend } from './WordDiff';
 
 const SESSION_SIZE = 10;
 const DIFFICULTIES = ['all', 'easy', 'medium', 'hard'];
-// Function words are not worth a flashcard on their own; the sentence card covers them.
-const SKIP_WORD_CARDS = new Set([
-  'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by', 'for', 'and', 'or',
-  'is', 'are', 'was', 'be', 'it', 'its', 'as', 'has', 'have', 'will',
-]);
 
 function buildSession(difficulty) {
   const pool = difficulty === 'all'
@@ -94,22 +89,14 @@ export default function WriteFromDictation() {
       total: prev.total + scored.total,
     }));
 
-    const reviewItems = scored.missedWords
-      .filter((word) => !SKIP_WORD_CARDS.has(word))
-      .map((word) => ({ kind: 'word', text: word, source: 'wfd', note: current.text }));
-
-    if (scored.percent < 100) {
-      reviewItems.push({ kind: 'sentence', text: current.text, source: 'wfd' });
-    }
-
     try {
-      await logAttempt({
+      setAddedCount(await recordAnswer({
         task: 'wfd',
         itemId: current.id,
         correct: scored.correct,
         total: scored.total,
-      });
-      setAddedCount(await addReviewItems(reviewItems));
+        reviewItems: getDictationReviewItems(current, scored),
+      }));
     } catch (err) {
       console.warn('Could not save dictation result.', err);
     }

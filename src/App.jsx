@@ -20,6 +20,7 @@ import RepeatSentence from './components/pte/RepeatSentence'
 import ReadAloud from './components/pte/ReadAloud'
 import Settings from './components/Settings'
 import OpenSpeakingPractice from './components/pte/OpenSpeakingPractice'
+import MockTest from './components/pte/MockTest'
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/pte/describe-image" element={<OpenSpeakingPractice key="di" task="di" />} />
               <Route path="/pte/retell-lecture" element={<OpenSpeakingPractice key="rl" task="rl" />} />
+              <Route path="/pte/mock-test" element={<MockTest />} />
             </Routes>
             <CatPawBtn />
           </div>

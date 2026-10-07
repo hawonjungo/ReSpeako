@@ -6,7 +6,7 @@ import { repeatSentenceBank } from '../../data/pte/speaking';
 import useTextToSpeech from '../../hooks/useTextToSpeech';
 import useSpeakingAttempt from '../../hooks/useSpeakingAttempt';
 import { scoreSpeaking } from '../../utils/scoring';
-import { addReviewItems, logAttempt } from '../../utils/reviewStore';
+import { getRepeatSentenceReviewItems, recordAnswer } from '../../utils/practiceRecords';
 import shuffleArray from '../../utils/shuffleArray';
 import playBeep from '../../utils/beep';
 import formatMessage from '../../utils/formatMessage';
@@ -57,14 +57,15 @@ export default function RepeatSentence() {
     setScores((prev) => [...prev, scored.overall]);
     setStage('result');
 
-    const save = async () => {
-      await logAttempt({ task: 'rs', itemId: current.id, correct: scored.correct, total: scored.total });
-      // Silence usually means a mic problem, not a memory gap.
-      if (attempt.transcript.trim() && scored.contentBand < 3) {
-        setAddedCount(await addReviewItems([{ kind: 'sentence', text: current.text, source: 'rs' }]));
-      }
-    };
-    save().catch((err) => console.warn('Could not save repeat sentence result.', err));
+    recordAnswer({
+      task: 'rs',
+      itemId: current.id,
+      correct: scored.correct,
+      total: scored.total,
+      reviewItems: getRepeatSentenceReviewItems(current, scored, attempt.transcript),
+    })
+      .then(setAddedCount)
+      .catch((err) => console.warn('Could not save repeat sentence result.', err));
   }, [attempt.phase, attempt.speakingSeconds, attempt.transcript, current, stage]);
 
   const handleStart = async () => {

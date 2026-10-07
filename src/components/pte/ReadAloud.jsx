@@ -5,8 +5,8 @@ import { translations } from '../../i18n/translations';
 import { readAloudBank } from '../../data/pte/speaking';
 import useTextToSpeech from '../../hooks/useTextToSpeech';
 import useSpeakingAttempt from '../../hooks/useSpeakingAttempt';
-import { normalizeText, scoreSpeaking } from '../../utils/scoring';
-import { addReviewItems, logAttempt } from '../../utils/reviewStore';
+import { scoreSpeaking } from '../../utils/scoring';
+import { getReadAloudReviewItems, recordAnswer } from '../../utils/practiceRecords';
 import playBeep from '../../utils/beep';
 import formatMessage from '../../utils/formatMessage';
 import PageContainer from '../ui/PageContainer';
@@ -20,16 +20,6 @@ import { resolveSpeakingEngine } from '../../utils/pronunciation';
 
 const PREP_SECONDS = 35;
 const ANSWER_SECONDS = 40;
-const SKIP_WORD_CARDS = new Set([
-  'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by', 'for', 'and', 'or',
-  'is', 'are', 'was', 'be', 'it', 'its', 'as', 'has', 'have', 'will', 'that', 'they',
-]);
-
-// The sentence containing a missed word gives the review card some context.
-function findSentenceWithWord(passage, word) {
-  const sentences = passage.match(/[^.!?]+[.!?]?/g) || [passage];
-  return (sentences.find((sentence) => normalizeText(sentence).split(' ').includes(word)) || '').trim();
-}
 
 export default function ReadAloud() {
   const { language } = useContext(LanguageContext);
@@ -84,21 +74,15 @@ export default function ReadAloud() {
     setResult(scored);
     setStage('result');
 
-    const save = async () => {
-      await logAttempt({ task: 'ra', itemId: passage.id, correct: scored.correct, total: scored.total });
-      // Only save misses when something was heard; silence means a mic problem.
-      if (!attempt.transcript.trim()) return;
-      const items = [...new Set(scored.missedWords)]
-        .filter((word) => !SKIP_WORD_CARDS.has(word))
-        .map((word) => ({
-          kind: 'word',
-          text: word,
-          source: 'ra',
-          note: findSentenceWithWord(passage.text, word),
-        }));
-      setAddedCount(await addReviewItems(items));
-    };
-    save().catch((err) => console.warn('Could not save read aloud result.', err));
+    recordAnswer({
+      task: 'ra',
+      itemId: passage.id,
+      correct: scored.correct,
+      total: scored.total,
+      reviewItems: getReadAloudReviewItems(passage, scored, attempt.transcript),
+    })
+      .then(setAddedCount)
+      .catch((err) => console.warn('Could not save read aloud result.', err));
   }, [attempt.phase, attempt.speakingSeconds, attempt.transcript, passage, stage]);
 
   const handleStart = () => {

@@ -5,6 +5,12 @@ import PrimaryButton from './ui/PrimaryButton';
 
 const learningModules = [
   {
+    title: 'Mock Test',
+    description: 'A 20-minute test in exam order with Speaking, Listening, Reading and Writing estimates at the end.',
+    href: '/pte/mock-test',
+    accent: 'from-rose-500/15 to-orange-500/10',
+  },
+  {
     title: 'Write from Dictation',
     description: 'PTE-style dictation: listen once, type the sentence, and see every missed word highlighted.',
     href: '/pte/write-from-dictation',
