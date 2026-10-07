@@ -20,7 +20,9 @@ const Header = () => {
             '/learning': '📚',
             '/ipa-pronounce': '🔊',
             '/loop-lab': '🔄',
-            '/word-formation': '🔤'
+            '/word-formation': '🔤',
+            '/pte/write-from-dictation': '✍️',
+            '/review': '🧠',
         };
         return iconMap[pathname] || '🎙️'; // Default to microphone icon
     };
@@ -32,6 +34,7 @@ const Header = () => {
     const items = [
         { label: t.common.home, href: "/" },
         { label: t.common.learning, href: "/learning" },
+        { label: t.common.review, href: "/review" },
     ];
 
     return (

@@ -9,11 +9,13 @@ import LanguageProvider from './contexts/LanguageContext'
 import CatPawBtn from './components/CatPawBtn'
 import Header from './components/layouts/Header'
 
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import IPAPronounce from './components/IPAPronounce'
 import LoopLab from './components/LoopLab'
 import Learning from './components/Learning'
 import WordFormation from './components/WordFormation'
+import WriteFromDictation from './components/pte/WriteFromDictation'
+import Review from './components/Review'
 
 function App() {
   return (
@@ -27,10 +29,13 @@ function App() {
             </div>
             <Routes>
               <Route path="/" element={<ReSpeako />} />
+              <Route path="/practice" element={<Navigate to="/" replace />} />
               <Route path="/ipa-pronounce" element={<IPAPronounce />} />
               <Route path="/loop-lab" element={<LoopLab />} />
               <Route path="/learning" element={<Learning />} />
               <Route path="/learning/word-formation" element={<WordFormation />} />
+              <Route path="/pte/write-from-dictation" element={<WriteFromDictation />} />
+              <Route path="/review" element={<Review />} />
             </Routes>
             <CatPawBtn />
           </div>

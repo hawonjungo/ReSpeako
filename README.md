@@ -17,6 +17,8 @@ ReSpeako is a versatile language tool application built with React and Capacitor
 *   **🎤 Speech-to-Text**: Accurately transcribes spoken audio into text using `@capacitor-community/speech-recognition` for native platforms and Web Speech API for browsers.
 *   **🔊 Text-to-Speech**: Converts written text into audible speech using `@capacitor-community/text-to-speech` for native platforms and Web SpeechSynthesis API for browsers.
 *   **🧾 IPA Checker**: Provides the International Phonetic Alphabet (IPA) transcription and definition for English words by fetching data from `https://api.dictionaryapi.dev`.
+*   **✍️ Write from Dictation (PTE)**: Listen to an academic sentence, type it, and get word-by-word feedback (correct / misspelled / missed / extra) scored like the real exam. Exam mode plays the audio only once.
+*   **🧠 Review Notebook (FSRS)**: Every word and sentence you miss is saved to IndexedDB and scheduled with the FSRS spaced-repetition algorithm (`ts-fsrs`), so it comes back right before you would forget it.
 *   **🎨 Theme Toggle**: Offers a seamless switch between light and dark modes for user comfort, with theme preference saved in local storage.
 *   **📱 Mobile-First Design**: Built with Capacitor for native mobile app capabilities on Android. Includes dynamic padding adjustments for on-screen keyboard visibility using `@capacitor/keyboard`.
 *   **✨ Dynamic UI**: Features an animated rotating text component (`RotatingText.jsx`) using Framer Motion for a lively user interface.

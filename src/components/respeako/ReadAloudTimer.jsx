@@ -1,6 +1,5 @@
 export default function ReadAloudTimer({ timeLeft, isActive }) {
   const isLowTime = isActive && timeLeft <= 10;
-  console.debug('ReadAloudTimer render: isActive=', isActive, 'timeLeft=', timeLeft);
 
   return (
     <div

@@ -3,28 +3,19 @@ import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
 import PrimaryButton from './ui/PrimaryButton';
 
-const quickStartItems = [
-  {
-    step: '1',
-    title: 'Warm up your speaking',
-    description: 'Open Practice to hear words, repeat them clearly, and get instant pronunciation feedback.',
-    href: '/practice',
-  },
-  {
-    step: '2',
-    title: 'Build a stronger word base',
-    description: 'Explore guided lessons that help you understand how words are formed and used.',
-    href: '/learning/word-formation',
-  },
-  {
-    step: '3',
-    title: 'Turn practice into progress',
-    description: 'Move through focused modules to improve vocabulary, grammar, and confidence day by day.',
-    href: '/learning/vocabulary',
-  },
-];
-
 const learningModules = [
+  {
+    title: 'Write from Dictation',
+    description: 'PTE-style dictation: listen once, type the sentence, and see every missed word highlighted.',
+    href: '/pte/write-from-dictation',
+    accent: 'from-teal-500/15 to-emerald-500/10',
+  },
+  {
+    title: 'Review Notebook',
+    description: 'Your missed words and sentences return on a spaced-repetition schedule so they stick for good.',
+    href: '/review',
+    accent: 'from-indigo-500/15 to-purple-500/10',
+  },
   {
     title: 'Word Formation',
     description: 'See how prefixes, suffixes, and roots help you decode and create new words faster.',
@@ -34,25 +25,25 @@ const learningModules = [
   {
     title: 'Grammar Tips',
     description: 'Tighten the structure of everyday English so your sentences feel natural and clear.',
-    href: '/learning/grammar-tips',
+    comingSoon: true,
     accent: 'from-emerald-500/15 to-lime-500/10',
   },
   {
     title: 'Academic Writing',
     description: 'Shape ideas into stronger paragraphs, essays, and formal responses with more control.',
-    href: '/learning/academic-writing',
+    comingSoon: true,
     accent: 'from-amber-500/15 to-orange-500/10',
   },
   {
     title: 'Vocabulary',
     description: 'Grow the words you can understand, remember, and actually use in real conversations.',
-    href: '/learning/vocabulary',
+    comingSoon: true,
     accent: 'from-rose-500/15 to-red-500/10',
   },
   {
     title: 'Pronunciation',
     description: 'Train your ear and your voice so the words you know sound confident when you say them.',
-    href: '/learning/pronunciation',
+    comingSoon: true,
     accent: 'from-fuchsia-500/15 to-pink-500/10',
   },
   {
@@ -70,7 +61,7 @@ const learningModules = [
   {
     title: 'Quizzes',
     description: 'Check what is sticking with quick review sessions that keep learning active and focused.',
-    href: '/learning/quizzes',
+    comingSoon: true,
     accent: 'from-violet-500/15 to-indigo-500/10',
   },
 ];
@@ -121,9 +112,15 @@ function LinkCard({ badge, title, description, href, cta, className = '', badgeC
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{description}</p>
           </div>
         </div>
-        <Link to={href}>
-          <PrimaryButton className="w-full">{cta}</PrimaryButton>
-        </Link>
+        {href ? (
+          <Link to={href}>
+            <PrimaryButton className="w-full">{cta}</PrimaryButton>
+          </Link>
+        ) : (
+          <PrimaryButton className="w-full" variant="secondary" disabled>
+            Coming soon
+          </PrimaryButton>
+        )}
       </div>
     </SectionCard>
   );
@@ -191,12 +188,12 @@ export default function Learning() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Link to="/practice">
+              <Link to="/">
                 <PrimaryButton className="w-full sm:w-auto">Go to Practice</PrimaryButton>
               </Link>
-              <Link to="/learning/vocabulary">
+              <Link to="/pte/write-from-dictation">
                 <PrimaryButton variant="secondary" className="w-full sm:w-auto">
-                  Browse Lessons
+                  Try Dictation
                 </PrimaryButton>
               </Link>
             </div>
