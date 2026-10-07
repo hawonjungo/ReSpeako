@@ -15,6 +15,8 @@ import PrimaryButton from '../ui/PrimaryButton';
 import StatusBanner from '../ui/StatusBanner';
 import RecordingPanel from './RecordingPanel';
 import SpeakingResult from './SpeakingResult';
+import EngineBadge from './EngineBadge';
+import { resolveSpeakingEngine } from '../../utils/pronunciation';
 
 const PREP_SECONDS = 35;
 const ANSWER_SECONDS = 40;
@@ -35,7 +37,9 @@ export default function ReadAloud() {
   const { speak, stop: stopSpeaking } = useTextToSpeech();
 
   const [recordVoice, setRecordVoice] = useState(true);
-  const attempt = useSpeakingAttempt({ maxSeconds: ANSWER_SECONDS, recordAudio: recordVoice });
+  const [engine] = useState(() => resolveSpeakingEngine());
+  const attempt = useSpeakingAttempt({ maxSeconds: ANSWER_SECONDS, recordAudio: recordVoice, engine });
+  const pronunciationErrors = translations[language].pronunciation.errors;
 
   const [passageIndex, setPassageIndex] = useState(0);
   const [stage, setStage] = useState('ready'); // ready | prep | answer | result
@@ -53,7 +57,7 @@ export default function ReadAloud() {
   const beginAnswer = async () => {
     setStage('answer');
     await playBeep();
-    attempt.start();
+    attempt.start(passage.text);
   };
 
   const beginAnswerRef = useRef(beginAnswer);
@@ -133,7 +137,8 @@ export default function ReadAloud() {
                 ))}
               </select>
             </label>
-            {attempt.recordingAvailable && (
+            <EngineBadge engine={engine} t={t} />
+            {engine === 'browser' && attempt.recordingAvailable && (
               <label className="flex items-center gap-2" title={t.recordHint}>
                 <input
                   type="checkbox"
@@ -174,6 +179,9 @@ export default function ReadAloud() {
             {stage === 'answer' && <RecordingPanel attempt={attempt} maxSeconds={ANSWER_SECONDS} t={t} />}
 
             {attempt.error && stage !== 'ready' && <StatusBanner type="error" message={attempt.error} />}
+            {attempt.assessError && stage === 'result' && (
+              <StatusBanner type="error" message={pronunciationErrors[attempt.assessError] || pronunciationErrors.default} />
+            )}
 
             {stage === 'result' && result && (
               <div className="space-y-4">
@@ -182,6 +190,7 @@ export default function ReadAloud() {
                   transcript={attempt.transcript}
                   audioUrl={attempt.audioUrl}
                   audioBlob={attempt.audioBlob}
+                  assessment={attempt.assessment}
                   referenceText={passage.text}
                   source="ra"
                   onPlayModel={() => speak(passage.text)}

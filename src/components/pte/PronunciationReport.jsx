@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LanguageContext } from '../../contexts/LanguageContext';
 import { translations } from '../../i18n/translations';
@@ -38,16 +38,39 @@ function ScoreTile({ label, value }) {
   );
 }
 
-export default function PronunciationReport({ audioBlob, referenceText, source }) {
+// `initialResult` is passed when the attempt was already scored by Azure (Azure engine).
+export default function PronunciationReport({ audioBlob, referenceText, source, initialResult = null }) {
   const { language } = useContext(LanguageContext);
   const t = translations[language].pronunciation;
   const { speak } = useTextToSpeech();
 
-  const [status, setStatus] = useState('idle'); // idle | loading | done | error
-  const [data, setData] = useState(null);
+  const [status, setStatus] = useState(initialResult ? 'done' : 'idle'); // idle | loading | done | error
+  const [data, setData] = useState(initialResult);
   const [errorCode, setErrorCode] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [addedCount, setAddedCount] = useState(0);
+  const savedRef = useRef(false);
+
+  const saveWeakWords = async (report) => {
+    if (savedRef.current) return;
+    savedRef.current = true;
+    const weakWords = getWeakWords(report);
+    const added = await addReviewItems(weakWords.map((word) => ({
+      kind: 'pronunciation',
+      text: word.word,
+      source,
+      note: describeWeakSounds(word),
+    })));
+    setAddedCount(added);
+  };
+
+  useEffect(() => {
+    if (initialResult) {
+      saveWeakWords(initialResult.report).catch((err) => console.warn('Could not save weak words.', err));
+    }
+    // Runs once per report; the component is keyed by recording.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!isPronunciationConfigured()) {
     return (
@@ -74,15 +97,7 @@ export default function PronunciationReport({ audioBlob, referenceText, source }
       }
       setData(result);
       setStatus('done');
-
-      const weakWords = getWeakWords(result.report);
-      const added = await addReviewItems(weakWords.map((word) => ({
-        kind: 'pronunciation',
-        text: word.word,
-        source,
-        note: describeWeakSounds(word),
-      })));
-      setAddedCount(added);
+      await saveWeakWords(result.report);
     } catch (error) {
       setErrorCode(error instanceof PronunciationError ? error.code : 'decode_failed');
       setStatus('error');

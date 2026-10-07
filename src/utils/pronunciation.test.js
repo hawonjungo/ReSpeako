@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { encodeWav } from './wav';
 import {
   describeWeakSounds,
+  resolveSpeakingEngine,
   getIpaPageSymbol,
   getWeakWords,
   parseAzureResult,
@@ -21,6 +22,8 @@ const flatResponse = {
     Words: [
       {
         Word: 'think',
+        Offset: 5_000_000,
+        Duration: 4_000_000,
         AccuracyScore: 40,
         ErrorType: 'Mispronunciation',
         Phonemes: [
@@ -30,7 +33,7 @@ const flatResponse = {
           { Phoneme: 'k', AccuracyScore: 95 },
         ],
       },
-      { Word: 'about', AccuracyScore: 55, ErrorType: 'None', Phonemes: [] },
+      { Word: 'about', Offset: 10_000_000, Duration: 5_000_000, AccuracyScore: 55, ErrorType: 'None', Phonemes: [] },
       { Word: 'it', AccuracyScore: 0, ErrorType: 'Omission', Phonemes: [] },
     ],
   }],
@@ -41,6 +44,8 @@ describe('parseAzureResult', () => {
     const report = parseAzureResult(flatResponse);
     expect(report).toMatchObject({ status: 'Success', accuracy: 72, prosody: 81, pronunciation: 81 });
     expect(report.words[0].phonemes[0]).toEqual({ phoneme: 'θ', accuracy: 12 });
+    // From 0.5 s (think) to 1.5 s (end of about); the omitted word is ignored.
+    expect(report.speechSeconds).toBeCloseTo(1);
   });
 
   it('reads the nested PronunciationAssessment format', () => {
@@ -69,12 +74,32 @@ describe('weak words', () => {
   });
 });
 
+describe('resolveSpeakingEngine', () => {
+  const base = { preference: 'auto', configured: true, isNative: false, userAgent: 'Windows Chrome' };
+
+  it('uses the browser when Azure is not configured', () => {
+    expect(resolveSpeakingEngine({ ...base, configured: false, preference: 'azure' })).toBe('browser');
+  });
+
+  it('picks Azure automatically on Android only', () => {
+    expect(resolveSpeakingEngine(base)).toBe('browser');
+    expect(resolveSpeakingEngine({ ...base, isNative: true })).toBe('azure');
+    expect(resolveSpeakingEngine({ ...base, userAgent: 'Linux; Android 14' })).toBe('azure');
+  });
+
+  it('respects an explicit choice', () => {
+    expect(resolveSpeakingEngine({ ...base, preference: 'azure' })).toBe('azure');
+    expect(resolveSpeakingEngine({ ...base, isNative: true, preference: 'browser' })).toBe('browser');
+  });
+});
+
 describe('phoneme helpers', () => {
   it('maps SAPI phones to IPA and IPA to explorer cards', () => {
     expect(toIpa('th')).toBe('θ');
     expect(toIpa('θ')).toBe('θ');
     expect(getIpaPageSymbol('oʊ')).toBe('əʊ');
-    expect(getIpaPageSymbol('θ')).toBeNull();
+    expect(getIpaPageSymbol('ɹ')).toBe('r');
+    expect(getIpaPageSymbol('x')).toBeNull();
   });
 });
 

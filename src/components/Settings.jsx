@@ -4,8 +4,12 @@ import { translations } from '../i18n/translations';
 import {
   fetchPronunciationUsage,
   getPronunciationConfig,
+  getSpeakingEnginePreference,
+  isPronunciationConfigured,
   PronunciationError,
   savePronunciationConfig,
+  saveSpeakingEnginePreference,
+  SPEAKING_ENGINES,
 } from '../utils/pronunciation';
 import formatMessage from '../utils/formatMessage';
 import PageContainer from './ui/PageContainer';
@@ -25,6 +29,12 @@ export default function Settings() {
   const [showToken, setShowToken] = useState(false);
   const [message, setMessage] = useState(null);
   const [testing, setTesting] = useState(false);
+  const [engine, setEngine] = useState(getSpeakingEnginePreference);
+
+  const handleEngineChange = (value) => {
+    setEngine(value);
+    saveSpeakingEnginePreference(value);
+  };
 
   const handleSave = () => {
     savePronunciationConfig({ endpoint, token });
@@ -107,6 +117,28 @@ export default function Settings() {
               <PrimaryButton onClick={handleSave} disabled={!endpoint}>{t.save}</PrimaryButton>
             </div>
           </div>
+        </SectionCard>
+
+        <SectionCard>
+          <fieldset className="space-y-3">
+            <legend className="text-lg font-semibold">{t.engineTitle}</legend>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{t.engineDescription}</p>
+            {SPEAKING_ENGINES.map((option) => (
+              <label key={option} className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="speaking-engine"
+                  value={option}
+                  checked={engine === option}
+                  onChange={() => handleEngineChange(option)}
+                />
+                {t.engineOptions[option]}
+              </label>
+            ))}
+            {!isPronunciationConfigured() && engine !== 'browser' && (
+              <p className="text-xs text-amber-700 dark:text-amber-300">{t.engineNeedsAzure}</p>
+            )}
+          </fieldset>
         </SectionCard>
       </div>
     </PageContainer>

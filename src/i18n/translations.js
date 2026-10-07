@@ -144,6 +144,9 @@ export const translations = {
       summaryScore: 'Average estimated score: {score}/90',
       restart: 'Practice again',
       goReview: 'Review mistakes',
+      engineAzure: 'Scored by Azure',
+      engineBrowser: 'Scored by browser recognition',
+      engineChange: 'Change in Settings',
     },
     progress: {
       streak: 'Practice streak',
@@ -181,7 +184,7 @@ export const translations = {
       errorTypes: { None: 'OK', Mispronunciation: 'Mispronounced', Omission: 'Skipped', Insertion: 'Extra word' },
       hearWord: 'Hear the word',
       practiseSound: 'Practise this sound in IPA Explorer',
-      phonemeHint: 'Tap a low-scoring vowel to practise it in IPA Explorer.',
+      phonemeHint: 'Tap a low-scoring sound to practise it in IPA Explorer.',
       addedToReview: '{count} word(s) added to your notebook for pronunciation practice.',
       errors: {
         not_configured: 'Add your Worker URL and access token in Settings first.',
@@ -192,6 +195,7 @@ export const translations = {
         invalid_audio: 'The recording could not be converted for checking.',
         decode_failed: 'The recording could not be read by this browser.',
         no_speech: 'Azure did not hear any speech in the recording.',
+        mic_unavailable: 'Could not open the microphone. Allow microphone access and try again.',
         network: 'Could not reach the Worker. Check the URL and your connection.',
         azure_error: 'Azure returned an error. Check the key and region on the Worker.',
         server_not_configured: 'The Worker is missing its secrets or KV binding.',
@@ -215,6 +219,14 @@ export const translations = {
       saved: 'Saved on this device.',
       removed: 'Token removed from this device.',
       connected: 'Connected. Used {used}/{limit} minutes this month.',
+      engineTitle: 'Speaking scoring engine',
+      engineDescription: 'Azure records your answer and scores pronunciation automatically (uses your monthly minutes). Browser recognition is free but cannot score pronunciation and may conflict with recording on Android.',
+      engineOptions: {
+        auto: 'Automatic (Azure on Android, browser elsewhere)',
+        browser: 'Browser recognition',
+        azure: 'Azure for every speaking answer',
+      },
+      engineNeedsAzure: 'Connect Azure above to use it for scoring.',
     },
     wordFormation: {
       pageTitle: 'Word Formation',
@@ -582,6 +594,9 @@ export const translations = {
       summaryScore: 'Điểm ước tính trung bình: {score}/90',
       restart: 'Luyện lại',
       goReview: 'Ôn lỗi sai',
+      engineAzure: 'Chấm bằng Azure',
+      engineBrowser: 'Chấm bằng nhận dạng của trình duyệt',
+      engineChange: 'Đổi trong Cài đặt',
     },
     progress: {
       streak: 'Chuỗi ngày luyện',
@@ -619,7 +634,7 @@ export const translations = {
       errorTypes: { None: 'Ổn', Mispronunciation: 'Phát âm sai', Omission: 'Bỏ sót', Insertion: 'Từ thừa' },
       hearWord: 'Nghe từ mẫu',
       practiseSound: 'Luyện âm này trong IPA Explorer',
-      phonemeHint: 'Bấm vào nguyên âm điểm thấp để luyện trong IPA Explorer.',
+      phonemeHint: 'Bấm vào âm điểm thấp để luyện trong IPA Explorer.',
       addedToReview: 'Đã thêm {count} từ vào sổ để luyện phát âm.',
       errors: {
         not_configured: 'Hãy nhập địa chỉ Worker và mã truy cập trong Cài đặt trước.',
@@ -630,6 +645,7 @@ export const translations = {
         invalid_audio: 'Không chuyển đổi được bản ghi để chấm.',
         decode_failed: 'Trình duyệt không đọc được bản ghi.',
         no_speech: 'Azure không nghe thấy giọng nói trong bản ghi.',
+        mic_unavailable: 'Không mở được micro. Hãy cho phép quyền micro và thử lại.',
         network: 'Không kết nối được Worker. Kiểm tra địa chỉ và mạng.',
         azure_error: 'Azure báo lỗi. Kiểm tra key và region trên Worker.',
         server_not_configured: 'Worker thiếu secret hoặc KV binding.',
@@ -653,6 +669,14 @@ export const translations = {
       saved: 'Đã lưu trên thiết bị này.',
       removed: 'Đã xóa mã khỏi thiết bị này.',
       connected: 'Kết nối thành công. Đã dùng {used}/{limit} phút tháng này.',
+      engineTitle: 'Công cụ chấm bài nói',
+      engineDescription: 'Azure ghi âm câu trả lời và tự động chấm phát âm (dùng số phút hàng tháng của bạn). Nhận dạng của trình duyệt miễn phí nhưng không chấm được phát âm và có thể xung đột với ghi âm trên Android.',
+      engineOptions: {
+        auto: 'Tự động (Azure trên Android, trình duyệt ở nơi khác)',
+        browser: 'Nhận dạng của trình duyệt',
+        azure: 'Azure cho mọi bài nói',
+      },
+      engineNeedsAzure: 'Kết nối Azure ở trên để dùng tùy chọn này.',
     },
     wordFormation: {
       pageTitle: 'Cấu tạo từ',

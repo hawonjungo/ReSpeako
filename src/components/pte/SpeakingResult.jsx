@@ -15,7 +15,7 @@ function ScoreTile({ label, value, hint }) {
 }
 
 export default function SpeakingResult({
-  result, transcript, audioUrl, audioBlob, referenceText, source, onPlayModel, showBand, t,
+  result, transcript, audioUrl, audioBlob, assessment, referenceText, source, onPlayModel, showBand, t,
 }) {
   if (!transcript.trim()) {
     return <StatusBanner type="warning" message={t.nothingHeard} />;
@@ -54,7 +54,13 @@ export default function SpeakingResult({
       <p className="text-xs text-gray-500 dark:text-gray-400">{t.estimateNote}</p>
 
       {/* Keyed by recording so a new attempt starts a fresh report. */}
-      <PronunciationReport key={audioUrl || 'none'} audioBlob={audioBlob} referenceText={referenceText} source={source} />
+      <PronunciationReport
+        key={audioUrl || 'none'}
+        audioBlob={audioBlob}
+        initialResult={assessment}
+        referenceText={referenceText}
+        source={source}
+      />
     </div>
   );
 }

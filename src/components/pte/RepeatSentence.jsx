@@ -16,6 +16,8 @@ import PrimaryButton from '../ui/PrimaryButton';
 import StatusBanner from '../ui/StatusBanner';
 import RecordingPanel from './RecordingPanel';
 import SpeakingResult from './SpeakingResult';
+import EngineBadge from './EngineBadge';
+import { resolveSpeakingEngine } from '../../utils/pronunciation';
 
 const SESSION_SIZE = 10;
 const ANSWER_SECONDS = 15;
@@ -26,7 +28,9 @@ export default function RepeatSentence() {
   const { speak, stop: stopSpeaking } = useTextToSpeech();
 
   const [recordVoice, setRecordVoice] = useState(true);
-  const attempt = useSpeakingAttempt({ maxSeconds: ANSWER_SECONDS, recordAudio: recordVoice });
+  const [engine] = useState(() => resolveSpeakingEngine());
+  const attempt = useSpeakingAttempt({ maxSeconds: ANSWER_SECONDS, recordAudio: recordVoice, engine });
+  const pronunciationErrors = translations[language].pronunciation.errors;
 
   const [session, setSession] = useState(() => shuffleArray(repeatSentenceBank).slice(0, SESSION_SIZE));
   const [index, setIndex] = useState(0);
@@ -73,7 +77,7 @@ export default function RepeatSentence() {
     await speak(current.text);
     await playBeep();
     setStage('answer');
-    attempt.start();
+    attempt.start(current.text);
   };
 
   const handleNext = () => {
@@ -121,7 +125,8 @@ export default function RepeatSentence() {
                 <p className="font-medium text-gray-600 dark:text-gray-300">
                   {formatMessage(t.progress, { current: index + 1, total: session.length })}
                 </p>
-                {attempt.recordingAvailable && (
+                <EngineBadge engine={engine} t={t} />
+                {engine === 'browser' && attempt.recordingAvailable && (
                   <label className="flex items-center gap-2" title={t.recordHint}>
                     <input
                       type="checkbox"
@@ -146,6 +151,9 @@ export default function RepeatSentence() {
               {stage === 'answer' && <RecordingPanel attempt={attempt} maxSeconds={ANSWER_SECONDS} t={t} />}
 
               {attempt.error && stage !== 'ready' && <StatusBanner type="error" message={attempt.error} />}
+              {attempt.assessError && stage === 'result' && (
+                <StatusBanner type="error" message={pronunciationErrors[attempt.assessError] || pronunciationErrors.default} />
+              )}
 
               {stage === 'result' && result && (
                 <div className="space-y-4">
@@ -157,6 +165,7 @@ export default function RepeatSentence() {
                     transcript={attempt.transcript}
                     audioUrl={attempt.audioUrl}
                     audioBlob={attempt.audioBlob}
+                    assessment={attempt.assessment}
                     referenceText={current.text}
                     source="rs"
                     onPlayModel={() => speak(current.text)}

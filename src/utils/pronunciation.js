@@ -1,8 +1,11 @@
 // Client for the owner-only pronunciation Worker (Azure Pronunciation Assessment).
+import { Capacitor } from '@capacitor/core';
 import { convertToWav16k } from './wav';
 
 const ENDPOINT_KEY = 'respeako_pron_endpoint';
 const TOKEN_KEY = 'respeako_pron_token';
+const ENGINE_KEY = 'respeako_speaking_engine';
+const TICKS_PER_SECOND = 10_000_000; // Azure offsets are in 100 ns units.
 const MAX_ASSESS_SECONDS = 30;
 export const WEAK_WORD_THRESHOLD = 60;
 
@@ -47,6 +50,33 @@ export function savePronunciationConfig({ endpoint, token }) {
 export function isPronunciationConfigured() {
   const { endpoint, token } = getPronunciationConfig();
   return Boolean(endpoint && token);
+}
+
+export const SPEAKING_ENGINES = ['auto', 'browser', 'azure'];
+
+export function getSpeakingEnginePreference() {
+  const stored = readStorage(ENGINE_KEY);
+  return SPEAKING_ENGINES.includes(stored) ? stored : 'auto';
+}
+
+export function saveSpeakingEnginePreference(value) {
+  writeStorage(ENGINE_KEY, value === 'auto' ? '' : value);
+}
+
+/**
+ * Which engine scores speaking tasks: 'azure' records audio only and lets Azure
+ * recognise it; 'browser' uses live speech recognition. Auto picks Azure on
+ * Android, where live recognition and recording fight over the microphone.
+ */
+export function resolveSpeakingEngine({
+  preference = getSpeakingEnginePreference(),
+  configured = isPronunciationConfigured(),
+  isNative = Capacitor.isNativePlatform(),
+  userAgent = typeof navigator === 'undefined' ? '' : navigator.userAgent,
+} = {}) {
+  if (!configured || preference === 'browser') return 'browser';
+  if (preference === 'azure') return 'azure';
+  return isNative || /Android/i.test(userAgent) ? 'azure' : 'browser';
 }
 
 function encodeBase64Utf8(value) {
@@ -98,7 +128,10 @@ export function toIpa(phoneme) {
 const IPA_PAGE_SYMBOLS = {
   i: 'iː', 'iː': 'iː', ɪ: 'ɪ', ʊ: 'ʊ', u: 'uː', 'uː': 'uː', ɛ: 'e', e: 'e', ə: 'ə', ɚ: 'ə',
   ɝ: 'ɜː', 'ɜː': 'ɜː', æ: 'æ', ʌ: 'ʌ', ɑ: 'ɑː', 'ɑː': 'ɑː', ɔ: 'ɔː', 'ɔː': 'ɔː', ɒ: 'ɒ',
-  eɪ: 'eɪ', oʊ: 'əʊ', əʊ: 'əʊ', aɪ: 'aɪ', aʊ: 'aʊ', ɔɪ: 'ɔɪ', ɪə: 'ɪə', eə: 'eə', ʊə: 'ʊə', l: 'l',
+  eɪ: 'eɪ', oʊ: 'əʊ', əʊ: 'əʊ', aɪ: 'aɪ', aʊ: 'aʊ', ɔɪ: 'ɔɪ', ɪə: 'ɪə', eə: 'eə', ʊə: 'ʊə',
+  p: 'p', b: 'b', t: 't', d: 'd', k: 'k', ɡ: 'ɡ', g: 'ɡ', tʃ: 'tʃ', dʒ: 'dʒ', f: 'f', v: 'v',
+  θ: 'θ', ð: 'ð', s: 's', z: 'z', ʃ: 'ʃ', ʒ: 'ʒ', h: 'h', m: 'm', n: 'n', ŋ: 'ŋ', l: 'l',
+  r: 'r', ɹ: 'r', w: 'w', j: 'j',
 };
 
 export function getIpaPageSymbol(phoneme) {
@@ -117,9 +150,21 @@ export function parseAzureResult(json) {
     return { status: json?.RecognitionStatus || 'Error', words: [] };
   }
 
+  // Speaking time from the first to the last spoken word.
+  const timedWords = (best.Words || []).filter((word) => (
+    typeof word.Offset === 'number' && typeof word.Duration === 'number'
+    && (word.PronunciationAssessment?.ErrorType || word.ErrorType) !== 'Omission'
+  ));
+  const speechSeconds = timedWords.length === 0 ? 0 : (
+    timedWords[timedWords.length - 1].Offset + timedWords[timedWords.length - 1].Duration - timedWords[0].Offset
+  ) / TICKS_PER_SECOND;
+
   return {
     status: 'Success',
     recognizedText: best.Display || json.DisplayText || '',
+    // Lexical form keeps numbers as words ("nine", not "9") to match reference text.
+    lexicalText: best.Lexical || best.Display || json.DisplayText || '',
+    speechSeconds,
     accuracy: scoreOf(best, 'AccuracyScore'),
     fluency: scoreOf(best, 'FluencyScore'),
     completeness: scoreOf(best, 'CompletenessScore'),

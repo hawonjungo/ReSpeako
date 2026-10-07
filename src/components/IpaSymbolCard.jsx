@@ -1,5 +1,8 @@
 export default function IpaSymbolCard({ item, onPlay, highlighted = false }) {
-  const parts = item.label.split(item.highlight);
+  // Split on the first match only, so words like "did" keep every letter.
+  const highlightAt = item.label.indexOf(item.highlight);
+  const before = highlightAt < 0 ? item.label : item.label.slice(0, highlightAt);
+  const after = highlightAt < 0 ? '' : item.label.slice(highlightAt + item.highlight.length);
 
   return (
     <button
@@ -16,18 +19,22 @@ export default function IpaSymbolCard({ item, onPlay, highlighted = false }) {
       <div className="mt-4 space-y-2">
         <div className="font-ipa text-4xl font-semibold text-gray-900 dark:text-white">{item.symbol}</div>
         <p className="text-base font-medium text-gray-900 dark:text-white">
-          {parts[0]}
-          <span className="underline decoration-cyan-500 decoration-2 underline-offset-4">
-            {item.highlight}
-          </span>
-          {parts[1]}
+          {before}
+          {highlightAt >= 0 && (
+            <span className="underline decoration-cyan-500 decoration-2 underline-offset-4">
+              {item.highlight}
+            </span>
+          )}
+          {after}
         </p>
       </div>
-      <img
-        src={item.icon}
-        alt={item.label}
-        className="mt-4 h-10 w-10 object-contain transition group-hover:scale-105"
-      />
+      {item.icon && (
+        <img
+          src={item.icon}
+          alt={item.label}
+          className="mt-4 h-10 w-10 object-contain transition group-hover:scale-105"
+        />
+      )}
     </button>
   );
 }
