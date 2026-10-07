@@ -37,7 +37,7 @@ The toughest part of post-graduate education is the funding.
 2:34
 You can contact all your tutors by email.
 2:43
-The railways made long-d distanceance travel possible for everyone.
+The railways made long-distance travel possible for everyone.
 2:54
 Sugar is a soluble carbohydrate that is used to sweeten food.
 3:05

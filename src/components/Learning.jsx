@@ -3,28 +3,115 @@ import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
 import PrimaryButton from './ui/PrimaryButton';
 
-const quickStartItems = [
-  {
-    step: '1',
-    title: 'Warm up your speaking',
-    description: 'Open Practice to hear words, repeat them clearly, and get instant pronunciation feedback.',
-    href: '/practice',
-  },
-  {
-    step: '2',
-    title: 'Build a stronger word base',
-    description: 'Explore guided lessons that help you understand how words are formed and used.',
-    href: '/learning/word-formation',
-  },
-  {
-    step: '3',
-    title: 'Turn practice into progress',
-    description: 'Move through focused modules to improve vocabulary, grammar, and confidence day by day.',
-    href: '/learning/vocabulary',
-  },
-];
-
 const learningModules = [
+  {
+    title: 'Mock Test',
+    description: 'A 35-minute test in exam order with Speaking, Listening, Reading and Writing estimates at the end.',
+    href: '/pte/mock-test',
+    accent: 'from-rose-500/15 to-orange-500/10',
+  },
+  {
+    title: 'Write from Dictation',
+    description: 'PTE-style dictation: listen once, type the sentence, and see every missed word highlighted.',
+    href: '/pte/write-from-dictation',
+    accent: 'from-teal-500/15 to-emerald-500/10',
+  },
+  {
+    title: 'Repeat Sentence',
+    description: 'Hear a sentence once and say it back after the beep, with content and fluency feedback.',
+    href: '/pte/repeat-sentence',
+    accent: 'from-orange-500/15 to-amber-500/10',
+  },
+  {
+    title: 'Read Aloud',
+    description: 'Real exam timing: 35 seconds to prepare, 40 to read, and every skipped word highlighted.',
+    href: '/pte/read-aloud',
+    accent: 'from-blue-500/15 to-cyan-500/10',
+  },
+  {
+    title: 'Describe Image',
+    description: 'Charts drawn in the app: 25 seconds to study, 40 to describe, scored on key ideas and pace.',
+    href: '/pte/describe-image',
+    accent: 'from-emerald-500/15 to-teal-500/10',
+  },
+  {
+    title: 'Retell Lecture',
+    description: 'Hear a short academic lecture once, take notes, and retell the main points in 40 seconds.',
+    href: '/pte/retell-lecture',
+    accent: 'from-fuchsia-500/15 to-violet-500/10',
+  },
+  {
+    title: 'Reading: Fill in the Blanks',
+    description: 'Dropdown and word-bank gap fills that train collocations, grammar and meaning.',
+    href: '/pte/reading/rwfib',
+    accent: 'from-sky-500/15 to-indigo-500/10',
+  },
+  {
+    title: 'Word Bank Blanks',
+    description: 'Complete a passage from a word bank with extra distractors, just like the exam.',
+    href: '/pte/reading/rfib',
+    accent: 'from-cyan-500/15 to-emerald-500/10',
+  },
+  {
+    title: 'Re-order Paragraphs',
+    description: 'Rebuild the logic of a text and learn how PTE scores each correct pair.',
+    href: '/pte/reading/rop',
+    accent: 'from-amber-500/15 to-yellow-500/10',
+  },
+  {
+    title: 'Multiple Choice',
+    description: 'Single and multiple-answer questions with PTE negative marking.',
+    href: '/pte/reading/mc',
+    accent: 'from-lime-500/15 to-green-500/10',
+  },
+  {
+    title: 'Summarize Written Text',
+    description: 'One sentence, 5-75 words, 10 minutes, with instant form checks and AI feedback.',
+    href: '/pte/writing/swt',
+    accent: 'from-violet-500/15 to-purple-500/10',
+  },
+  {
+    title: 'Write Essay',
+    description: '200-300 words in 20 minutes, scored on PTE traits with corrections and an improved version.',
+    href: '/pte/writing/essay',
+    accent: 'from-pink-500/15 to-rose-500/10',
+  },
+  {
+    title: 'Summarize Spoken Text',
+    description: 'Hear a lecture once and summarise it in 50-70 words, with AI feedback.',
+    href: '/pte/writing/sst',
+    accent: 'from-teal-500/15 to-cyan-500/10',
+  },
+  {
+    title: 'Highlight Incorrect Words',
+    description: 'Follow the transcript and catch every word the speaker says differently.',
+    href: '/pte/listening/hiw',
+    accent: 'from-yellow-500/15 to-amber-500/10',
+  },
+  {
+    title: 'Listening: Fill in the Blanks',
+    description: 'Type the missing words as you listen; spelling must be exact.',
+    href: '/pte/listening/lfib',
+    accent: 'from-blue-500/15 to-sky-500/10',
+  },
+  {
+    title: 'Select Missing Word',
+    description: 'Predict the ending that a beep replaces, from the meaning of the whole recording.',
+    href: '/pte/listening/smw',
+    accent: 'from-orange-500/15 to-red-500/10',
+  },
+  {
+    title: 'Highlight Correct Summary',
+    description: 'Listen to a lecture and pick the summary that captures it best.',
+    href: '/pte/listening/hcs',
+    accent: 'from-emerald-500/15 to-lime-500/10',
+  },
+  {
+    title: 'Review Notebook',
+    description: 'Your missed words and sentences return on a spaced-repetition schedule so they stick for good.',
+    href: '/review',
+    accent: 'from-indigo-500/15 to-purple-500/10',
+  },
   {
     title: 'Word Formation',
     description: 'See how prefixes, suffixes, and roots help you decode and create new words faster.',
@@ -34,25 +121,25 @@ const learningModules = [
   {
     title: 'Grammar Tips',
     description: 'Tighten the structure of everyday English so your sentences feel natural and clear.',
-    href: '/learning/grammar-tips',
+    comingSoon: true,
     accent: 'from-emerald-500/15 to-lime-500/10',
   },
   {
     title: 'Academic Writing',
     description: 'Shape ideas into stronger paragraphs, essays, and formal responses with more control.',
-    href: '/learning/academic-writing',
+    comingSoon: true,
     accent: 'from-amber-500/15 to-orange-500/10',
   },
   {
     title: 'Vocabulary',
     description: 'Grow the words you can understand, remember, and actually use in real conversations.',
-    href: '/learning/vocabulary',
+    comingSoon: true,
     accent: 'from-rose-500/15 to-red-500/10',
   },
   {
     title: 'Pronunciation',
     description: 'Train your ear and your voice so the words you know sound confident when you say them.',
-    href: '/learning/pronunciation',
+    href: '/pronunciation',
     accent: 'from-fuchsia-500/15 to-pink-500/10',
   },
   {
@@ -70,7 +157,7 @@ const learningModules = [
   {
     title: 'Quizzes',
     description: 'Check what is sticking with quick review sessions that keep learning active and focused.',
-    href: '/learning/quizzes',
+    comingSoon: true,
     accent: 'from-violet-500/15 to-indigo-500/10',
   },
 ];
@@ -121,9 +208,15 @@ function LinkCard({ badge, title, description, href, cta, className = '', badgeC
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{description}</p>
           </div>
         </div>
-        <Link to={href}>
-          <PrimaryButton className="w-full">{cta}</PrimaryButton>
-        </Link>
+        {href ? (
+          <Link to={href}>
+            <PrimaryButton className="w-full">{cta}</PrimaryButton>
+          </Link>
+        ) : (
+          <PrimaryButton className="w-full" variant="secondary" disabled>
+            Coming soon
+          </PrimaryButton>
+        )}
       </div>
     </SectionCard>
   );
@@ -191,12 +284,12 @@ export default function Learning() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Link to="/practice">
+              <Link to="/">
                 <PrimaryButton className="w-full sm:w-auto">Go to Practice</PrimaryButton>
               </Link>
-              <Link to="/learning/vocabulary">
+              <Link to="/pte/write-from-dictation">
                 <PrimaryButton variant="secondary" className="w-full sm:w-auto">
-                  Browse Lessons
+                  Try Dictation
                 </PrimaryButton>
               </Link>
             </div>

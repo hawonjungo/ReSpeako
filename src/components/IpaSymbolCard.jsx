@@ -1,11 +1,17 @@
-export default function IpaSymbolCard({ item, onPlay }) {
-  const parts = item.label.split(item.highlight);
+export default function IpaSymbolCard({ item, onPlay, highlighted = false }) {
+  // Split on the first match only, so words like "did" keep every letter.
+  const highlightAt = item.label.indexOf(item.highlight);
+  const before = highlightAt < 0 ? item.label : item.label.slice(0, highlightAt);
+  const after = highlightAt < 0 ? '' : item.label.slice(highlightAt + item.highlight.length);
 
   return (
     <button
       type="button"
+      id={`ipa-symbol-${item.symbol}`}
       onClick={() => onPlay(item)}
-      className="group flex h-full flex-col items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950"
+      className={`group flex h-full flex-col items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 ${
+        highlighted ? 'ring-4 ring-rose-400 dark:ring-rose-500' : ''
+      }`}
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-50 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:bg-cyan-950 dark:text-cyan-200">
         IPA
@@ -13,18 +19,22 @@ export default function IpaSymbolCard({ item, onPlay }) {
       <div className="mt-4 space-y-2">
         <div className="font-ipa text-4xl font-semibold text-gray-900 dark:text-white">{item.symbol}</div>
         <p className="text-base font-medium text-gray-900 dark:text-white">
-          {parts[0]}
-          <span className="underline decoration-cyan-500 decoration-2 underline-offset-4">
-            {item.highlight}
-          </span>
-          {parts[1]}
+          {before}
+          {highlightAt >= 0 && (
+            <span className="underline decoration-cyan-500 decoration-2 underline-offset-4">
+              {item.highlight}
+            </span>
+          )}
+          {after}
         </p>
       </div>
-      <img
-        src={item.icon}
-        alt={item.label}
-        className="mt-4 h-10 w-10 object-contain transition group-hover:scale-105"
-      />
+      {item.icon && (
+        <img
+          src={item.icon}
+          alt={item.label}
+          className="mt-4 h-10 w-10 object-contain transition group-hover:scale-105"
+        />
+      )}
     </button>
   );
 }

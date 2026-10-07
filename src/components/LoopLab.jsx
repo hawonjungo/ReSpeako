@@ -5,6 +5,8 @@ import useSpeechRecognition from '../hooks/useSpeechRecognition';
 import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
 import PrimaryButton from './ui/PrimaryButton';
+import { getTextSimilarityScore, normalizeText } from '../utils/scoring';
+import { addReviewItems, logAttempt } from '../utils/reviewStore';
 
 const MIN_SEGMENT_DURATION = 1.5;
 
@@ -84,14 +86,6 @@ function parseTimeToSeconds(value) {
   return Number.NaN;
 }
 
-function normalizeText(value) {
-  return String(value || '')
-    .toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 function capitalizeFirstCharacter(value) {
   const input = String(value || '');
 
@@ -100,32 +94,6 @@ function capitalizeFirstCharacter(value) {
   }
 
   return input.charAt(0).toUpperCase() + input.slice(1);
-}
-
-function getTextSimilarityScore(referenceText, heardText) {
-  const normalizedReference = normalizeText(referenceText);
-  const normalizedHeard = normalizeText(heardText);
-
-  if (!normalizedReference || !normalizedHeard) {
-    return 0;
-  }
-
-  if (normalizedReference === normalizedHeard) {
-    return 1;
-  }
-
-  const referenceWords = normalizedReference.split(' ');
-  const heardWords = normalizedHeard.split(' ');
-  const maxLength = Math.max(referenceWords.length, heardWords.length);
-  let sharedWords = 0;
-
-  for (let index = 0; index < Math.min(referenceWords.length, heardWords.length); index += 1) {
-    if (referenceWords[index] === heardWords[index]) {
-      sharedWords += 1;
-    }
-  }
-
-  return maxLength === 0 ? 0 : sharedWords / maxLength;
 }
 
 function extractYouTubeVideoId(value) {
@@ -1260,7 +1228,17 @@ export default function LoopLab() {
   }
 
   function handleCheckComparison() {
-    setComparison(getComparisonResult(referenceText, heardText));
+    const result = getComparisonResult(referenceText, heardText);
+    setComparison(result);
+
+    if (result.score === null) return;
+    const save = async () => {
+      await logAttempt({ task: 'looplab', itemId: normalizeText(referenceText), correct: result.score, total: 100 });
+      if (result.score < 100) {
+        await addReviewItems([{ kind: 'sentence', text: referenceText, source: 'looplab' }]);
+      }
+    };
+    save().catch((err) => console.warn('Could not save shadowing result.', err));
   }
 
   async function handleTranscriptFileChange(event) {

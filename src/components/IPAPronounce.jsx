@@ -1,6 +1,7 @@
-import { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import IpaSymbolCard from './IpaSymbolCard';
+import useTextToSpeech from '../hooks/useTextToSpeech';
 import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
 import PrimaryButton from './ui/PrimaryButton';
@@ -56,6 +57,30 @@ const ipaGroups = [
         icon: '/assets/IPA-icons/my.png',
         soundFile: '21-ph.mp3',
       },
+      // speakLabel: no confirmed recording yet, so TTS reads the example word.
+      { id: 'c-pen', symbol: 'p', label: 'pen', highlight: 'p', speakLabel: true },
+      { id: 'c-bad', symbol: 'b', label: 'bad', highlight: 'b', speakLabel: true },
+      { id: 'c-tea', symbol: 't', label: 'tea', highlight: 't', speakLabel: true },
+      { id: 'c-did', symbol: 'd', label: 'did', highlight: 'd', speakLabel: true },
+      { id: 'c-cat', symbol: 'k', label: 'cat', highlight: 'c', speakLabel: true },
+      { id: 'c-get', symbol: 'ɡ', label: 'get', highlight: 'g', speakLabel: true },
+      { id: 'c-chain', symbol: 'tʃ', label: 'chain', highlight: 'ch', speakLabel: true },
+      { id: 'c-jam', symbol: 'dʒ', label: 'jam', highlight: 'j', speakLabel: true },
+      { id: 'c-fall', symbol: 'f', label: 'fall', highlight: 'f', speakLabel: true },
+      { id: 'c-van', symbol: 'v', label: 'van', highlight: 'v', speakLabel: true },
+      { id: 'c-think', symbol: 'θ', label: 'think', highlight: 'th', speakLabel: true },
+      { id: 'c-this', symbol: 'ð', label: 'this', highlight: 'th', speakLabel: true },
+      { id: 'c-see', symbol: 's', label: 'see', highlight: 's', speakLabel: true },
+      { id: 'c-zoo', symbol: 'z', label: 'zoo', highlight: 'z', speakLabel: true },
+      { id: 'c-shoe', symbol: 'ʃ', label: 'shoe', highlight: 'sh', speakLabel: true },
+      { id: 'c-vision', symbol: 'ʒ', label: 'vision', highlight: 's', speakLabel: true },
+      { id: 'c-hat', symbol: 'h', label: 'hat', highlight: 'h', speakLabel: true },
+      { id: 'c-man', symbol: 'm', label: 'man', highlight: 'm', speakLabel: true },
+      { id: 'c-now', symbol: 'n', label: 'now', highlight: 'n', speakLabel: true },
+      { id: 'c-sing', symbol: 'ŋ', label: 'sing', highlight: 'ng', speakLabel: true },
+      { id: 'c-red', symbol: 'r', label: 'red', highlight: 'r', speakLabel: true },
+      { id: 'c-wet', symbol: 'w', label: 'wet', highlight: 'w', speakLabel: true },
+      { id: 'c-yes', symbol: 'j', label: 'yes', highlight: 'y', speakLabel: true },
     ],
   },
 ];
@@ -93,8 +118,22 @@ function SectionHeading({ eyebrow, title, description }) {
 
 export default function IPAPronounce() {
   const audioCache = useRef({});
+  // Pronunciation feedback links here with ?symbol= to point at a weak sound.
+  const [searchParams] = useSearchParams();
+  const focusSymbol = searchParams.get('symbol');
+
+  useEffect(() => {
+    if (!focusSymbol) return;
+    document.getElementById(`ipa-symbol-${focusSymbol}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [focusSymbol]);
+
+  const { speak } = useTextToSpeech();
 
   const playIpaSound = (item) => {
+    if (item.speakLabel) {
+      speak(item.label, { rate: 0.7 }).catch(() => undefined);
+      return;
+    }
     const soundFile = item.soundFile || `${item.id}.mp3`;
 
     if (!audioCache.current[soundFile]) {
@@ -211,7 +250,12 @@ export default function IPAPronounce() {
 
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                     {group.items.map((item) => (
-                      <IpaSymbolCard key={`${group.title}-${item.id}`} item={item} onPlay={playIpaSound} />
+                      <IpaSymbolCard
+                        key={`${group.title}-${item.id}`}
+                        item={item}
+                        onPlay={playIpaSound}
+                        highlighted={item.symbol === focusSymbol}
+                      />
                     ))}
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../ThemeContext';
 import { LanguageContext } from '../../contexts/LanguageContext';
 import { translations } from '../../i18n/translations';
@@ -20,7 +20,27 @@ const Header = () => {
             '/learning': '📚',
             '/ipa-pronounce': '🔊',
             '/loop-lab': '🔄',
-            '/word-formation': '🔤'
+            '/word-formation': '🔤',
+            '/pte/write-from-dictation': '✍️',
+            '/review': '🧠',
+            '/pte/repeat-sentence': '🔁',
+            '/pte/read-aloud': '📖',
+            '/settings': '⚙️',
+            '/pte/describe-image': '📊',
+            '/pte/retell-lecture': '🎧',
+            '/pte/mock-test': '📝',
+            '/pte/reading/rwfib': '📖',
+            '/pte/reading/rfib': '🧩',
+            '/pte/reading/rop': '🔀',
+            '/pte/reading/mc': '☑️',
+            '/pte/writing/swt': '✍️',
+            '/pte/writing/essay': '📄',
+            '/pte/writing/sst': '🎧',
+            '/pte/listening/hiw': '🖍️',
+            '/pte/listening/lfib': '⌨️',
+            '/pte/listening/smw': '🔔',
+            '/pte/listening/hcs': '🎯',
+            '/pronunciation': '👄',
         };
         return iconMap[pathname] || '🎙️'; // Default to microphone icon
     };
@@ -32,13 +52,20 @@ const Header = () => {
     const items = [
         { label: t.common.home, href: "/" },
         { label: t.common.learning, href: "/learning" },
+        { label: t.common.review, href: "/review" },
     ];
 
     return (
         <header
             className={`relative container mx-auto  py-4 flex flex-col items-center ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px]`}
         >
-            <div className="mb-3 flex w-full items-center justify-end">
+            <div className="mb-3 flex w-full items-center justify-end gap-2">
+                <Link
+                    to="/settings"
+                    className="rounded-full border border-cyan-500/30 bg-cyan-50 px-3 py-1.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100 dark:border-cyan-400/40 dark:bg-cyan-950/40 dark:text-cyan-200"
+                >
+                    ⚙️ {t.common.settings}
+                </Link>
                 <button
                     type="button"
                     onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
