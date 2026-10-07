@@ -174,3 +174,47 @@ export function scoreDictation(referenceText, typedText) {
     missedWords,
   };
 }
+
+// Comfortable PTE speaking pace; slower or much faster speech loses fluency credit.
+const IDEAL_WPM_MIN = 110;
+const IDEAL_WPM_MAX = 170;
+const SLOW_WPM_FLOOR = 50;
+
+export function getFluencyFactor(wordCount, speakingSeconds) {
+  if (!wordCount || !speakingSeconds || speakingSeconds <= 0) return 0;
+
+  const wpm = (wordCount / speakingSeconds) * 60;
+  if (wpm >= IDEAL_WPM_MIN && wpm <= IDEAL_WPM_MAX) return 1;
+  if (wpm < IDEAL_WPM_MIN) {
+    return Math.max(0, (wpm - SLOW_WPM_FLOOR) / (IDEAL_WPM_MIN - SLOW_WPM_FLOOR));
+  }
+  // Rushing is penalised gently.
+  return Math.max(0.5, 1 - (wpm - IDEAL_WPM_MAX) / 200);
+}
+
+/**
+ * Rough PTE-style estimate for Read Aloud / Repeat Sentence from a speech
+ * transcript. Only an indication: real PTE also scores pronunciation audio.
+ */
+export function scoreSpeaking(referenceText, transcript, speakingSeconds) {
+  const dictation = scoreDictation(referenceText, transcript);
+  const spokenWords = tokenizeWords(transcript).length;
+  const contentFactor = dictation.total === 0 ? 0 : dictation.correct / dictation.total;
+  const fluencyFactor = getFluencyFactor(spokenWords, speakingSeconds);
+  const toPteScale = (factor) => Math.round(10 + 80 * factor);
+
+  // Repeat Sentence content band used by PTE: 3 = all words, 2 = 50%+, 1 = some.
+  let contentBand = 0;
+  if (contentFactor === 1) contentBand = 3;
+  else if (contentFactor >= 0.5) contentBand = 2;
+  else if (contentFactor > 0) contentBand = 1;
+
+  return {
+    ...dictation,
+    contentBand,
+    wpm: speakingSeconds > 0 ? Math.round((spokenWords / speakingSeconds) * 60) : 0,
+    content: toPteScale(contentFactor),
+    fluency: toPteScale(fluencyFactor),
+    overall: spokenWords === 0 ? 10 : toPteScale(contentFactor * 0.6 + fluencyFactor * 0.4),
+  };
+}

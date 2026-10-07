@@ -11,6 +11,18 @@ const learningModules = [
     accent: 'from-teal-500/15 to-emerald-500/10',
   },
   {
+    title: 'Repeat Sentence',
+    description: 'Hear a sentence once and say it back after the beep, with content and fluency feedback.',
+    href: '/pte/repeat-sentence',
+    accent: 'from-orange-500/15 to-amber-500/10',
+  },
+  {
+    title: 'Read Aloud',
+    description: 'Real exam timing: 35 seconds to prepare, 40 to read, and every skipped word highlighted.',
+    href: '/pte/read-aloud',
+    accent: 'from-blue-500/15 to-cyan-500/10',
+  },
+  {
     title: 'Review Notebook',
     description: 'Your missed words and sentences return on a spaced-repetition schedule so they stick for good.',
     href: '/review',

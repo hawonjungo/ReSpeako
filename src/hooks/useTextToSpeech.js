@@ -51,7 +51,20 @@ export default function useTextToSpeech() {
     const utterance = new window.SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     utterance.rate = rate;
-    window.speechSynthesis.speak(utterance);
+
+    // Resolve when speech ends so callers can chain a beep or recording.
+    // Some browsers never fire onend, so fall back to an estimated duration.
+    await new Promise((resolve) => {
+      const wordCount = text.trim().split(/\s+/).length;
+      const fallback = window.setTimeout(resolve, (wordCount * 600) / rate + 3000);
+      const finish = () => {
+        window.clearTimeout(fallback);
+        resolve();
+      };
+      utterance.onend = finish;
+      utterance.onerror = finish;
+      window.speechSynthesis.speak(utterance);
+    });
   }, []);
 
   return { speak, stop };

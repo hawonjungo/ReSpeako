@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { alignWords, getTextSimilarityScore, normalizeText, scoreDictation } from './scoring';
+import { alignWords, getTextSimilarityScore, normalizeText, scoreDictation, scoreSpeaking } from './scoring';
 
 describe('normalizeText', () => {
   it('lowercases, strips punctuation and collapses spaces', () => {
@@ -50,5 +50,28 @@ describe('scoreDictation', () => {
 
   it('scores empty answers as zero', () => {
     expect(scoreDictation('research is vital', '').percent).toBe(0);
+  });
+});
+
+describe('scoreSpeaking', () => {
+  it('gives full marks for every word at a natural pace', () => {
+    // 6 words in 3 seconds = 120 wpm.
+    const result = scoreSpeaking('The seminar starts at nine tomorrow', 'the seminar starts at nine tomorrow', 3);
+    expect(result.contentBand).toBe(3);
+    expect(result.content).toBe(90);
+    expect(result.fluency).toBe(90);
+    expect(result.overall).toBe(90);
+  });
+
+  it('lowers fluency for very slow speech', () => {
+    // 6 words in 6 seconds = 60 wpm.
+    const result = scoreSpeaking('The seminar starts at nine tomorrow', 'the seminar starts at nine tomorrow', 6);
+    expect(result.fluency).toBeLessThan(30);
+  });
+
+  it('uses the PTE content bands', () => {
+    expect(scoreSpeaking('one two three four', 'one two three', 2).contentBand).toBe(2);
+    expect(scoreSpeaking('one two three four', 'one', 1).contentBand).toBe(1);
+    expect(scoreSpeaking('one two three four', '', 0).overall).toBe(10);
   });
 });

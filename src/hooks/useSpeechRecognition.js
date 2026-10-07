@@ -166,10 +166,20 @@ export default function useSpeechRecognition({ onTranscriptChange }) {
     finalTextRef.current = '';
   };
 
+  const startListening = async () => {
+    if (!isListeningRef.current) await toggleListening();
+  };
+
+  const stopListening = async () => {
+    if (isListeningRef.current) await toggleListening();
+  };
+
   return {
     isListening,
     speechError,
     toggleListening,
+    startListening,
+    stopListening,
     resetTranscriptBuffer,
   };
 }

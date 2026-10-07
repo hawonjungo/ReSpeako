@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { LanguageContext } from '../contexts/LanguageContext';
 import { translations } from '../i18n/translations';
 import useTextToSpeech from '../hooks/useTextToSpeech';
+import useSpeechRecognition from '../hooks/useSpeechRecognition';
 import { scoreDictation } from '../utils/scoring';
 import {
   getAllReviewItems,
@@ -17,6 +18,7 @@ import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
 import PrimaryButton from './ui/PrimaryButton';
 import EmptyState from './ui/EmptyState';
+import ProgressSummary from './ProgressSummary';
 import WordDiff from './pte/WordDiff';
 
 const RATING_BUTTONS = [
@@ -58,6 +60,11 @@ export default function Review() {
   const [answer, setAnswer] = useState('');
   const [result, setResult] = useState(null);
   const [reviewedCount, setReviewedCount] = useState(0);
+  const { isListening, toggleListening, stopListening } = useSpeechRecognition({
+    onTranscriptChange: (text) => {
+      if (text) setAnswer(text);
+    },
+  });
 
   const loadItems = useCallback(async () => {
     const items = await getAllReviewItems();
@@ -89,12 +96,14 @@ export default function Review() {
 
   const handleCheck = () => {
     if (!current) return;
+    stopListening();
     const scored = scoreDictation(current.text, answer);
     setResult({ ...scored, suggested: suggestRating(scored.percent) });
   };
 
   const handleReveal = () => {
     if (!current) return;
+    stopListening();
     setResult({ ...scoreDictation(current.text, ''), suggested: Rating.Again });
   };
 
@@ -137,6 +146,8 @@ export default function Review() {
           <StatTile label={t.dueToday} value={loading ? '…' : Math.max(dueCount, 0)} />
           <StatTile label={t.total} value={loading ? '…' : allItems.length} />
         </div>
+
+        <ProgressSummary t={translations[language].progress} language={language} />
 
         {!loading && !current && (
           <SectionCard>
@@ -197,6 +208,9 @@ export default function Review() {
 
               {!result && (
                 <div className="flex flex-wrap justify-end gap-2">
+                  <PrimaryButton variant="secondary" onClick={toggleListening} aria-pressed={isListening}>
+                    {isListening ? t.stopSpeaking : t.speakAnswer}
+                  </PrimaryButton>
                   <PrimaryButton variant="ghost" onClick={handleReveal}>{t.showAnswer}</PrimaryButton>
                   <PrimaryButton onClick={handleCheck} disabled={!answer.trim()}>{t.check}</PrimaryButton>
                 </div>

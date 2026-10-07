@@ -23,6 +23,8 @@ const Header = () => {
             '/word-formation': '🔤',
             '/pte/write-from-dictation': '✍️',
             '/review': '🧠',
+            '/pte/repeat-sentence': '🔁',
+            '/pte/read-aloud': '📖',
         };
         return iconMap[pathname] || '🎙️'; // Default to microphone icon
     };

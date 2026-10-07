@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import PrimaryButton from '../ui/PrimaryButton';
+import { addReviewItems, logAttempt } from '../../utils/reviewStore';
 import SectionCard from '../ui/SectionCard';
 
 export default function QuizResultCard({
@@ -26,6 +28,28 @@ export default function QuizResultCard({
   });
 
   const score = results.filter((result) => result.isCorrect).length;
+  const savedRef = useRef(false);
+
+  // Wrong answers go to the review notebook as spelling cards for the correct form.
+  useEffect(() => {
+    if (savedRef.current) return;
+    savedRef.current = true;
+
+    const wrongItems = results
+      .filter((result) => !result.isCorrect)
+      .map((result) => ({
+        kind: 'word',
+        text: result.correctAnswer,
+        source: 'wordformation',
+        note: result.explanation || result.question,
+      }));
+
+    const save = async () => {
+      await logAttempt({ task: 'wordformation', itemId: 'quiz', correct: score, total: questions.length });
+      await addReviewItems(wrongItems);
+    };
+    save().catch((err) => console.warn('Could not save quiz result.', err));
+  }, [questions.length, results, score]);
 
   return (
     <SectionCard className="border-slate-200/80 bg-white/95 shadow-[0_20px_45px_rgba(15,23,42,0.08)] dark:border-slate-800 dark:bg-slate-900/85 dark:shadow-none">

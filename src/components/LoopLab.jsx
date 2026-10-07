@@ -6,6 +6,7 @@ import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
 import PrimaryButton from './ui/PrimaryButton';
 import { getTextSimilarityScore, normalizeText } from '../utils/scoring';
+import { addReviewItems, logAttempt } from '../utils/reviewStore';
 
 const MIN_SEGMENT_DURATION = 1.5;
 
@@ -1227,7 +1228,17 @@ export default function LoopLab() {
   }
 
   function handleCheckComparison() {
-    setComparison(getComparisonResult(referenceText, heardText));
+    const result = getComparisonResult(referenceText, heardText);
+    setComparison(result);
+
+    if (result.score === null) return;
+    const save = async () => {
+      await logAttempt({ task: 'looplab', itemId: normalizeText(referenceText), correct: result.score, total: 100 });
+      if (result.score < 100) {
+        await addReviewItems([{ kind: 'sentence', text: referenceText, source: 'looplab' }]);
+      }
+    };
+    save().catch((err) => console.warn('Could not save shadowing result.', err));
   }
 
   async function handleTranscriptFileChange(event) {

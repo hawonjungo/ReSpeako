@@ -16,6 +16,8 @@ import Learning from './components/Learning'
 import WordFormation from './components/WordFormation'
 import WriteFromDictation from './components/pte/WriteFromDictation'
 import Review from './components/Review'
+import RepeatSentence from './components/pte/RepeatSentence'
+import ReadAloud from './components/pte/ReadAloud'
 
 function App() {
   return (
@@ -36,6 +38,8 @@ function App() {
               <Route path="/learning/word-formation" element={<WordFormation />} />
               <Route path="/pte/write-from-dictation" element={<WriteFromDictation />} />
               <Route path="/review" element={<Review />} />
+              <Route path="/pte/repeat-sentence" element={<RepeatSentence />} />
+              <Route path="/pte/read-aloud" element={<ReadAloud />} />
             </Routes>
             <CatPawBtn />
           </div>
