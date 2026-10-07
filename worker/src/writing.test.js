@@ -72,6 +72,24 @@ describe('writing feedback endpoint', () => {
     expect((await response.json()).error).toBe('ai_not_configured');
   });
 
+  it('accepts Summarize Spoken Text with its own traits', async () => {
+    geminiFetch.mockResolvedValueOnce(geminiReply({
+      traits: {
+        content: { score: 2, comment: '' },
+        grammar: { score: 2, comment: '' },
+        vocabulary: { score: 1, comment: '' },
+        spelling: { score: 2, comment: '' },
+      },
+      corrections: [],
+      overallComment: '',
+      improvedVersion: '',
+    }));
+    const response = await worker.fetch(writingRequest({ ...swtBody, task: 'sst' }), createEnv());
+    const body = await response.json();
+    expect(body.feedback.traits.map((trait) => trait.name)).toEqual(['content', 'grammar', 'vocabulary', 'spelling']);
+    expect(JSON.parse(geminiFetch.mock.calls[0][1].body).contents[0].parts[0].text).toContain('<LECTURE TRANSCRIPT>');
+  });
+
   it('rejects unknown tasks and oversized answers', async () => {
     const env = createEnv();
     expect((await worker.fetch(writingRequest({ ...swtBody, task: 'poem' }), env)).status).toBe(400);

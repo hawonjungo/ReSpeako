@@ -5,7 +5,7 @@ import { translations } from '../../i18n/translations';
 import { readAloudBank, repeatSentenceBank } from '../../data/pte/speaking';
 import { describeImageBank, retellLectureBank } from '../../data/pte/openSpeaking';
 import { writeFromDictationBank } from '../../data/pte/writeFromDictation';
-import { READING_TASKS } from './reading/readingTasks';
+import { OBJECTIVE_TASKS } from './objectiveTasks';
 import useTextToSpeech from '../../hooks/useTextToSpeech';
 import { buildMockTest, computeMockScores, MOCK_STRUCTURE, SKILLS } from '../../utils/mockTest';
 import { getAttempts, logAttempt } from '../../utils/reviewStore';
@@ -17,7 +17,7 @@ import PrimaryButton from '../ui/PrimaryButton';
 import EngineBadge from './EngineBadge';
 import SpeakingItemRunner from './mock/SpeakingItemRunner';
 import DictationItemRunner from './mock/DictationItemRunner';
-import ReadingItemRunner from './mock/ReadingItemRunner';
+import ObjectiveItemRunner from './mock/ObjectiveItemRunner';
 
 const BANKS = {
   ra: readAloudBank,
@@ -25,7 +25,7 @@ const BANKS = {
   di: describeImageBank,
   rl: retellLectureBank,
   wfd: writeFromDictationBank,
-  ...Object.fromEntries(Object.entries(READING_TASKS).map(([type, config]) => [type, config.bank])),
+  ...Object.fromEntries(Object.entries(OBJECTIVE_TASKS).map(([type, config]) => [type, config.bank])),
 };
 const HISTORY_SIZE = 5;
 
@@ -217,8 +217,8 @@ export default function MockTest() {
               {current.type === 'wfd' && (
                 <DictationItemRunner key={index} item={current.item} onComplete={handleItemComplete} tm={tm} />
               )}
-              {READING_TASKS[current.type] && (
-                <ReadingItemRunner
+              {OBJECTIVE_TASKS[current.type] && (
+                <ObjectiveItemRunner
                   key={index}
                   type={current.type}
                   item={current.item}

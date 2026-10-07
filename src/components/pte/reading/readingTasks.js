@@ -1,4 +1,4 @@
-// One place describing each reading task: its bank, empty answer, scoring and widget.
+// Reading tasks: bank, empty answer, scoring and widget. See ../objectiveTasks.js.
 import {
   fillBlanksBank,
   multipleChoiceBank,
@@ -6,7 +6,6 @@ import {
   rwFillBlanksBank,
 } from '../../../data/pte/reading';
 import { initialReorder, scoreBlanks, scoreMultipleChoice, scoreReorder } from '../../../utils/reading';
-import { getBlanksReviewItems } from '../../../utils/practiceRecords';
 import { DropdownBlanks, MultipleChoice, ReorderList, WordBankBlanks } from './ReadingQuestions';
 
 export const READING_TASKS = {
@@ -41,21 +40,3 @@ export const READING_TASKS = {
     Widget: MultipleChoice,
   },
 };
-
-// Props for each widget: the answer and marking use different names per widget.
-export function getWidgetProps(task, { item, answer, onChange, scored, labels }) {
-  switch (task) {
-    case 'rop':
-      return { item, order: answer, onChange, results: scored?.pairResults, labels };
-    case 'mc':
-      return { item, selected: answer, onChange, showAnswers: Boolean(scored) };
-    default:
-      return { item, value: answer, onChange, results: scored?.results, labels };
-  }
-}
-
-// Missed blanks become word cards; ordering and multiple choice have no word to drill.
-export function getReadingReviewItems(task, item, scored) {
-  const config = READING_TASKS[task];
-  return config.correctWords ? getBlanksReviewItems(task, item, config.correctWords(item), scored) : [];
-}

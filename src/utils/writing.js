@@ -57,3 +57,19 @@ export function toWritingScale(points, maxPoints) {
   if (!maxPoints) return 10;
   return Math.round(10 + 80 * Math.max(0, Math.min(1, points / maxPoints)));
 }
+
+/**
+ * Summarize Spoken Text form (0-2): 50-70 words = 2, 40-49 or 71-100 = 1, otherwise 0.
+ * Under 40 or over 100 words PTE gives no credit for the other traits.
+ */
+export function checkSpokenSummaryForm(text) {
+  const words = countWords(text);
+  let form = 0;
+  if (words >= 50 && words <= 70) form = 2;
+  else if ((words >= 40 && words < 50) || (words > 70 && words <= 100)) form = 1;
+
+  const issues = [];
+  if (words < 50) issues.push('tooShort');
+  if (words > 70) issues.push('tooLong');
+  return { words, form, max: 2, issues, blocksScoring: form === 0 };
+}

@@ -14,6 +14,12 @@ export const WRITING_TRAITS = {
     grammar: { max: 2, rubric: '2 = correct grammatical structure; 1 = errors that do not hinder communication; 0 = defective structure that hinders communication.' },
     vocabulary: { max: 2, rubric: '2 = appropriate choice of words; 1 = some lexical errors that do not hinder communication; 0 = lexical errors that hinder communication.' },
   },
+  sst: {
+    content: { max: 2, rubric: '2 = provides a good summary of the lecture with the main points; 1 = provides a fair summary but misses one or two key points or has inaccuracies; 0 = omits or misrepresents the main aspects of the lecture.' },
+    grammar: { max: 2, rubric: '2 = correct grammatical structures; 1 = contains grammatical errors with no hindrance to communication; 0 = defective grammatical structure that could hinder communication.' },
+    vocabulary: { max: 2, rubric: '2 = appropriate choice of words; 1 = some lexical errors but with no hindrance to communication; 0 = defective word choice that could hinder communication.' },
+    spelling: { max: 2, rubric: '2 = correct spelling; 1 = one spelling error; 0 = more than one spelling error.' },
+  },
   essay: {
     content: { max: 3, rubric: '3 = fully addresses the prompt in depth with convincing arguments and relevant examples; 2 = adequately addresses the main point with some superficial elements; 1 = superficial, with significant gaps; 0 = does not address the prompt.' },
     development: { max: 2, rubric: 'Development, structure and coherence. 2 = logical structure, clear paragraphs with topic sentences, effective connectors; 1 = some structure but lapses in coherence; 0 = no clear structure.' },
@@ -27,7 +33,10 @@ export const WRITING_TRAITS = {
 const TASK_DESCRIPTIONS = {
   swt: 'PTE Academic "Summarize Written Text": the candidate must summarise the passage in ONE sentence of 5-75 words.',
   essay: 'PTE Academic "Write Essay": the candidate must write a 200-300 word argumentative essay on the prompt.',
+  sst: 'PTE Academic "Summarize Spoken Text": the candidate heard a short lecture once and must summarise it in 50-70 words. You are given the lecture transcript.',
 };
+
+const SOURCE_LABELS = { swt: 'PASSAGE', essay: 'ESSAY PROMPT', sst: 'LECTURE TRANSCRIPT' };
 
 const LANGUAGE_NAMES = { en: 'English', vi: 'Vietnamese' };
 
@@ -163,7 +172,7 @@ export async function handleWriting(request, env, cors) {
   }
 
   const model = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
-  const label = task === 'swt' ? 'PASSAGE' : 'ESSAY PROMPT';
+  const label = SOURCE_LABELS[task];
   const geminiResponse = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
     {

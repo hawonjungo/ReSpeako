@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 import { LanguageContext } from '../../../contexts/LanguageContext';
 import { translations } from '../../../i18n/translations';
 import { essayBank, summarizeBank } from '../../../data/pte/writing';
-import { checkEssayForm, checkSummaryForm, countParagraphs, countSentences, countWords, toWritingScale } from '../../../utils/writing';
+import { retellLectureBank } from '../../../data/pte/openSpeaking';
+import useTextToSpeech from '../../../hooks/useTextToSpeech';
+import {
+  checkEssayForm, checkSpokenSummaryForm, checkSummaryForm, countParagraphs, countSentences, countWords, toWritingScale,
+} from '../../../utils/writing';
 import { getCorrectionReviewItems, requestWritingFeedback } from '../../../utils/writingFeedback';
 import { isPronunciationConfigured, PronunciationError } from '../../../utils/pronunciation';
 import { recordAnswer } from '../../../utils/practiceRecords';
@@ -17,6 +21,8 @@ import StatusBanner from '../../ui/StatusBanner';
 const TASKS = {
   swt: { bank: summarizeBank, minutes: 10, check: checkSummaryForm, promptOf: (item) => item.passage },
   essay: { bank: essayBank, minutes: 20, check: checkEssayForm, promptOf: (item) => item.prompt },
+  // Summarize Spoken Text reuses the lectures; the lecture plays once before writing.
+  sst: { bank: retellLectureBank, minutes: 10, check: checkSpokenSummaryForm, promptOf: (item) => item.text, audio: true },
 };
 
 function formatClock(seconds) {
@@ -39,7 +45,7 @@ export default function WritingPractice({ task }) {
   const config = TASKS[task];
 
   const [itemIndex, setItemIndex] = useState(0);
-  const [stage, setStage] = useState('ready'); // ready | writing | submitted
+  const [stage, setStage] = useState('ready'); // ready | listening (SST) | writing | submitted
   const [text, setText] = useState('');
   const [timeLeft, setTimeLeft] = useState(config.minutes * 60);
   const [form, setForm] = useState(null);
@@ -48,6 +54,9 @@ export default function WritingPractice({ task }) {
   const [errorCode, setErrorCode] = useState('');
   const [usage, setUsage] = useState(null);
   const [addedCount, setAddedCount] = useState(0);
+  const [notes, setNotes] = useState('');
+  const [lecturePlaying, setLecturePlaying] = useState(false);
+  const { speak, stop: stopSpeaking } = useTextToSpeech();
   const textRef = useRef('');
   const submitRef = useRef(null);
   const recordedRef = useRef(false);
@@ -59,6 +68,23 @@ export default function WritingPractice({ task }) {
   useEffect(() => {
     textRef.current = text;
   }, [text]);
+
+  useEffect(() => () => {
+    stopSpeaking();
+  }, [stopSpeaking]);
+
+  // Summarize Spoken Text: play the lecture once, then the writing time starts.
+  const handleStart = async () => {
+    if (!config.audio) {
+      setStage('writing');
+      return;
+    }
+    setStage('listening');
+    setLecturePlaying(true);
+    await speak(item.text);
+    setLecturePlaying(false);
+    setStage((current) => (current === 'listening' ? 'writing' : current));
+  };
 
   // Countdown; the answer is submitted automatically when time runs out, as in the exam.
   useEffect(() => {
@@ -122,6 +148,9 @@ export default function WritingPractice({ task }) {
   submitRef.current = handleSubmit;
 
   const chooseItem = (nextIndex) => {
+    stopSpeaking();
+    setLecturePlaying(false);
+    setNotes('');
     recordedRef.current = false;
     setItemIndex(nextIndex);
     setStage('ready');
@@ -139,9 +168,11 @@ export default function WritingPractice({ task }) {
   const totalPoints = form ? (form.blocksScoring ? 0 : form.form + traitPoints) : 0;
   const totalMax = form ? form.max + traitMax : 0;
 
-  const countersOk = task === 'swt'
-    ? { words: words >= 5 && words <= 75, sentences: countSentences(text) === 1 }
-    : { words: words >= 200 && words <= 300, paragraphs: countParagraphs(text) >= 3 };
+  const countersOk = {
+    swt: { words: words >= 5 && words <= 75, sentences: countSentences(text) === 1 },
+    essay: { words: words >= 200 && words <= 300, paragraphs: countParagraphs(text) >= 3 },
+    sst: { words: words >= 50 && words <= 70 },
+  }[task];
 
   return (
     <PageContainer title={tt.title} description={tt.description}>
@@ -151,7 +182,7 @@ export default function WritingPractice({ task }) {
             <span className="font-medium">{t.choose}</span>
             <select
               value={itemIndex}
-              disabled={stage === 'writing'}
+              disabled={stage === 'writing' || stage === 'listening'}
               onChange={(event) => chooseItem(Number(event.target.value))}
               className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 dark:border-gray-700 dark:bg-gray-900"
             >
@@ -171,9 +202,22 @@ export default function WritingPractice({ task }) {
         <SectionCard>
           <div className="space-y-4">
             <p className="text-sm text-gray-600 dark:text-gray-300">{tt.instruction}</p>
-            {task === 'swt'
-              ? <p className="leading-7">{item.passage}</p>
-              : <p className="font-medium leading-7">{item.prompt}</p>}
+            {task === 'swt' && <p className="leading-7">{item.passage}</p>}
+            {task === 'essay' && <p className="font-medium leading-7">{item.prompt}</p>}
+            {task === 'sst' && stage === 'listening' && (
+              <StatusBanner type="info" message={lecturePlaying ? tt.listening : tt.ready} />
+            )}
+            {task === 'sst' && (stage === 'listening' || stage === 'writing') && (
+              <label className="block space-y-1">
+                <span className="text-sm font-medium">{tt.notes}</span>
+                <textarea
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  rows={3}
+                  className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm outline-none focus:border-cyan-500 dark:border-gray-700 dark:bg-gray-950"
+                />
+              </label>
+            )}
 
             {task === 'essay' && stage !== 'submitted' && (
               <details className="rounded-xl border border-gray-200 p-3 text-sm dark:border-gray-800">
@@ -185,19 +229,18 @@ export default function WritingPractice({ task }) {
             )}
 
             {stage === 'ready' && (
-              <PrimaryButton onClick={() => setStage('writing')}>
-                {formatMessage(t.start, { minutes: config.minutes })}
+              <PrimaryButton onClick={handleStart}>
+                {formatMessage(tt.startLabel || t.start, { minutes: config.minutes })}
               </PrimaryButton>
             )}
 
-            {stage !== 'ready' && (
+            {(stage === 'writing' || stage === 'submitted') && (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                   <div className="flex flex-wrap gap-2">
                     <Counter label={t.words} value={words} ok={countersOk.words} />
-                    {task === 'swt'
-                      ? <Counter label={t.sentences} value={countSentences(text)} ok={countersOk.sentences} />
-                      : <Counter label={t.paragraphs} value={countParagraphs(text)} ok={countersOk.paragraphs} />}
+                    {task === 'swt' && <Counter label={t.sentences} value={countSentences(text)} ok={countersOk.sentences} />}
+                    {task === 'essay' && <Counter label={t.paragraphs} value={countParagraphs(text)} ok={countersOk.paragraphs} />}
                   </div>
                   {stage === 'writing' && (
                     <span className={`font-mono tabular-nums ${timeLeft <= 60 ? 'text-rose-600' : ''}`} aria-label={t.timeLeft}>
@@ -303,10 +346,16 @@ export default function WritingPractice({ task }) {
                   </div>
                 )}
 
-                {task === 'swt' && (
+                {(task === 'swt' || task === 'sst') && (
                   <details className="rounded-xl border border-gray-200 p-3 text-sm dark:border-gray-800">
                     <summary className="cursor-pointer font-medium">{t.sample}</summary>
                     <p className="mt-2 leading-6">{item.sample}</p>
+                  </details>
+                )}
+                {task === 'sst' && (
+                  <details className="rounded-xl border border-gray-200 p-3 text-sm dark:border-gray-800">
+                    <summary className="cursor-pointer font-medium">{tt.transcript}</summary>
+                    <p className="mt-2 leading-6">{item.text}</p>
                   </details>
                 )}
 

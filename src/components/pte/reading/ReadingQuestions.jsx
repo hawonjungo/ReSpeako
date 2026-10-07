@@ -176,8 +176,8 @@ export function MultipleChoice({ item, selected, onChange, showAnswers }) {
 
   return (
     <div className="space-y-4">
-      <p className="leading-7">{item.passage}</p>
-      <p className="font-medium">{item.question}</p>
+      {item.passage && <p className="leading-7">{item.passage}</p>}
+      {item.question && <p className="font-medium">{item.question}</p>}
       <div className="space-y-2">
         {item.options.map((option) => {
           const isSelected = selected.includes(option.id);

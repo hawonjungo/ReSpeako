@@ -6,7 +6,7 @@ import PrimaryButton from './ui/PrimaryButton';
 const learningModules = [
   {
     title: 'Mock Test',
-    description: 'A 30-minute test in exam order with Speaking, Listening, Reading and Writing estimates at the end.',
+    description: 'A 35-minute test in exam order with Speaking, Listening, Reading and Writing estimates at the end.',
     href: '/pte/mock-test',
     accent: 'from-rose-500/15 to-orange-500/10',
   },
@@ -75,6 +75,36 @@ const learningModules = [
     description: '200-300 words in 20 minutes, scored on PTE traits with corrections and an improved version.',
     href: '/pte/writing/essay',
     accent: 'from-pink-500/15 to-rose-500/10',
+  },
+  {
+    title: 'Summarize Spoken Text',
+    description: 'Hear a lecture once and summarise it in 50-70 words, with AI feedback.',
+    href: '/pte/writing/sst',
+    accent: 'from-teal-500/15 to-cyan-500/10',
+  },
+  {
+    title: 'Highlight Incorrect Words',
+    description: 'Follow the transcript and catch every word the speaker says differently.',
+    href: '/pte/listening/hiw',
+    accent: 'from-yellow-500/15 to-amber-500/10',
+  },
+  {
+    title: 'Listening: Fill in the Blanks',
+    description: 'Type the missing words as you listen; spelling must be exact.',
+    href: '/pte/listening/lfib',
+    accent: 'from-blue-500/15 to-sky-500/10',
+  },
+  {
+    title: 'Select Missing Word',
+    description: 'Predict the ending that a beep replaces, from the meaning of the whole recording.',
+    href: '/pte/listening/smw',
+    accent: 'from-orange-500/15 to-red-500/10',
+  },
+  {
+    title: 'Highlight Correct Summary',
+    description: 'Listen to a lecture and pick the summary that captures it best.',
+    href: '/pte/listening/hcs',
+    accent: 'from-emerald-500/15 to-lime-500/10',
   },
   {
     title: 'Review Notebook',

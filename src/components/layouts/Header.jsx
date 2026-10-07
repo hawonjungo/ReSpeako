@@ -35,6 +35,11 @@ const Header = () => {
             '/pte/reading/mc': '☑️',
             '/pte/writing/swt': '✍️',
             '/pte/writing/essay': '📄',
+            '/pte/writing/sst': '🎧',
+            '/pte/listening/hiw': '🖍️',
+            '/pte/listening/lfib': '⌨️',
+            '/pte/listening/smw': '🔔',
+            '/pte/listening/hcs': '🎯',
         };
         return iconMap[pathname] || '🎙️'; // Default to microphone icon
     };

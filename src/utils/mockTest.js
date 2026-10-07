@@ -1,7 +1,7 @@
 // Short PTE-style mock test: structure, item selection and skill scoring.
 import shuffleArray from './shuffleArray';
 
-// Exam order (speaking, reading, listening), trimmed to about 30 minutes.
+// Exam order (speaking, reading, listening), trimmed to about 35 minutes.
 export const MOCK_STRUCTURE = [
   { type: 'ra', count: 2 },
   { type: 'rs', count: 3 },
@@ -11,6 +11,10 @@ export const MOCK_STRUCTURE = [
   { type: 'mc', count: 1 },
   { type: 'rop', count: 1 },
   { type: 'rfib', count: 1 },
+  { type: 'lfib', count: 1 },
+  { type: 'hcs', count: 1 },
+  { type: 'smw', count: 1 },
+  { type: 'hiw', count: 1 },
   { type: 'wfd', count: 3 },
 ];
 
@@ -24,6 +28,10 @@ export const SKILL_MAP = {
   mc: ['reading'],
   rop: ['reading'],
   rfib: ['reading'],
+  lfib: ['listening', 'writing'],
+  hcs: ['listening', 'reading'],
+  smw: ['listening'],
+  hiw: ['listening', 'reading'],
   wfd: ['listening', 'writing'],
 };
 
