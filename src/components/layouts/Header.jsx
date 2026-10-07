@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../ThemeContext';
 import { LanguageContext } from '../../contexts/LanguageContext';
 import { translations } from '../../i18n/translations';
@@ -25,6 +25,7 @@ const Header = () => {
             '/review': '🧠',
             '/pte/repeat-sentence': '🔁',
             '/pte/read-aloud': '📖',
+            '/settings': '⚙️',
         };
         return iconMap[pathname] || '🎙️'; // Default to microphone icon
     };
@@ -43,7 +44,13 @@ const Header = () => {
         <header
             className={`relative container mx-auto  py-4 flex flex-col items-center ${darkMode ? 'bg-cyan text-white' : 'bg-white text-black'} min-w-[320px]`}
         >
-            <div className="mb-3 flex w-full items-center justify-end">
+            <div className="mb-3 flex w-full items-center justify-end gap-2">
+                <Link
+                    to="/settings"
+                    className="rounded-full border border-cyan-500/30 bg-cyan-50 px-3 py-1.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100 dark:border-cyan-400/40 dark:bg-cyan-950/40 dark:text-cyan-200"
+                >
+                    ⚙️ {t.common.settings}
+                </Link>
                 <button
                     type="button"
                     onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}

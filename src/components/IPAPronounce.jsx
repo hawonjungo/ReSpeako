@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import IpaSymbolCard from './IpaSymbolCard';
 import PageContainer from './ui/PageContainer';
 import SectionCard from './ui/SectionCard';
@@ -93,6 +93,14 @@ function SectionHeading({ eyebrow, title, description }) {
 
 export default function IPAPronounce() {
   const audioCache = useRef({});
+  // Pronunciation feedback links here with ?symbol= to point at a weak sound.
+  const [searchParams] = useSearchParams();
+  const focusSymbol = searchParams.get('symbol');
+
+  useEffect(() => {
+    if (!focusSymbol) return;
+    document.getElementById(`ipa-symbol-${focusSymbol}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [focusSymbol]);
 
   const playIpaSound = (item) => {
     const soundFile = item.soundFile || `${item.id}.mp3`;
@@ -211,7 +219,12 @@ export default function IPAPronounce() {
 
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                     {group.items.map((item) => (
-                      <IpaSymbolCard key={`${group.title}-${item.id}`} item={item} onPlay={playIpaSound} />
+                      <IpaSymbolCard
+                        key={`${group.title}-${item.id}`}
+                        item={item}
+                        onPlay={playIpaSound}
+                        highlighted={item.symbol === focusSymbol}
+                      />
                     ))}
                   </div>
                 </div>

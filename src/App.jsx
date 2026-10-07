@@ -18,6 +18,7 @@ import WriteFromDictation from './components/pte/WriteFromDictation'
 import Review from './components/Review'
 import RepeatSentence from './components/pte/RepeatSentence'
 import ReadAloud from './components/pte/ReadAloud'
+import Settings from './components/Settings'
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
               <Route path="/review" element={<Review />} />
               <Route path="/pte/repeat-sentence" element={<RepeatSentence />} />
               <Route path="/pte/read-aloud" element={<ReadAloud />} />
+              <Route path="/settings" element={<Settings />} />
             </Routes>
             <CatPawBtn />
           </div>

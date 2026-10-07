@@ -2,6 +2,7 @@ import PrimaryButton from '../ui/PrimaryButton';
 import StatusBanner from '../ui/StatusBanner';
 import formatMessage from '../../utils/formatMessage';
 import WordDiff, { WordDiffLegend } from './WordDiff';
+import PronunciationReport from './PronunciationReport';
 
 function ScoreTile({ label, value, hint }) {
   return (
@@ -13,7 +14,9 @@ function ScoreTile({ label, value, hint }) {
   );
 }
 
-export default function SpeakingResult({ result, transcript, audioUrl, onPlayModel, showBand, t }) {
+export default function SpeakingResult({
+  result, transcript, audioUrl, audioBlob, referenceText, source, onPlayModel, showBand, t,
+}) {
   if (!transcript.trim()) {
     return <StatusBanner type="warning" message={t.nothingHeard} />;
   }
@@ -49,6 +52,9 @@ export default function SpeakingResult({ result, transcript, audioUrl, onPlayMod
       </div>
 
       <p className="text-xs text-gray-500 dark:text-gray-400">{t.estimateNote}</p>
+
+      {/* Keyed by recording so a new attempt starts a fresh report. */}
+      <PronunciationReport key={audioUrl || 'none'} audioBlob={audioBlob} referenceText={referenceText} source={source} />
     </div>
   );
 }

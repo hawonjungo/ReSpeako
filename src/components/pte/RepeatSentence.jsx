@@ -156,6 +156,9 @@ export default function RepeatSentence() {
                     result={result}
                     transcript={attempt.transcript}
                     audioUrl={attempt.audioUrl}
+                    audioBlob={attempt.audioBlob}
+                    referenceText={current.text}
+                    source="rs"
                     onPlayModel={() => speak(current.text)}
                     showBand
                     t={t}

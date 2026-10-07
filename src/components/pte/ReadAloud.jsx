@@ -181,6 +181,9 @@ export default function ReadAloud() {
                   result={result}
                   transcript={attempt.transcript}
                   audioUrl={attempt.audioUrl}
+                  audioBlob={attempt.audioBlob}
+                  referenceText={passage.text}
+                  source="ra"
                   onPlayModel={() => speak(passage.text)}
                   t={t}
                 />

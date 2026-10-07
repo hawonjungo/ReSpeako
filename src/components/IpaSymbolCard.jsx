@@ -1,11 +1,14 @@
-export default function IpaSymbolCard({ item, onPlay }) {
+export default function IpaSymbolCard({ item, onPlay, highlighted = false }) {
   const parts = item.label.split(item.highlight);
 
   return (
     <button
       type="button"
+      id={`ipa-symbol-${item.symbol}`}
       onClick={() => onPlay(item)}
-      className="group flex h-full flex-col items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950"
+      className={`group flex h-full flex-col items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 ${
+        highlighted ? 'ring-4 ring-rose-400 dark:ring-rose-500' : ''
+      }`}
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-50 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:bg-cyan-950 dark:text-cyan-200">
         IPA

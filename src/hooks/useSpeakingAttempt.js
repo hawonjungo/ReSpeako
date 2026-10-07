@@ -156,6 +156,7 @@ export default function useSpeakingAttempt({ maxSeconds, silenceMs = 3000, recor
     elapsed,
     speakingSeconds,
     audioUrl: recorder.audioUrl,
+    audioBlob: recorder.audioBlob,
     recordingAvailable,
     error: speechError,
     start,

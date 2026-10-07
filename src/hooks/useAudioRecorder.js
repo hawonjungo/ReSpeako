@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 // Records the microphone with MediaRecorder so learners can replay their own voice.
 export default function useAudioRecorder() {
   const [audioUrl, setAudioUrl] = useState('');
+  const [audioBlob, setAudioBlob] = useState(null);
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
   const chunksRef = useRef([]);
@@ -21,6 +22,7 @@ export default function useAudioRecorder() {
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     urlRef.current = '';
     setAudioUrl('');
+    setAudioBlob(null);
   }, []);
 
   const start = useCallback(async () => {
@@ -58,6 +60,7 @@ export default function useAudioRecorder() {
       const url = URL.createObjectURL(blob);
       urlRef.current = url;
       setAudioUrl(url);
+      setAudioBlob(blob);
       releaseStream();
       recorderRef.current = null;
       resolve(url);
@@ -71,5 +74,5 @@ export default function useAudioRecorder() {
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
   }, []);
 
-  return { audioUrl, isSupported, start, stop, clear };
+  return { audioUrl, audioBlob, isSupported, start, stop, clear };
 }

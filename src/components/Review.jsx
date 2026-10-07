@@ -188,7 +188,19 @@ export default function Review() {
                 </span>
               </div>
 
-              <p className="text-sm text-gray-600 dark:text-gray-300">{t.listenPrompt}</p>
+              {current.kind === 'pronunciation' ? (
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{t.sayPrompt}</p>
+                  <p className="text-3xl font-semibold">{current.text}</p>
+                  {current.note && (
+                    <p className="font-ipa text-sm text-rose-700 dark:text-rose-300">
+                      {t.weakSounds}: {current.note}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600 dark:text-gray-300">{t.listenPrompt}</p>
+              )}
               <PrimaryButton onClick={handlePlay} className="w-full sm:w-auto">{t.play}</PrimaryButton>
 
               <input
