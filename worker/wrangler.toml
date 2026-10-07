@@ -1,3 +1,5 @@
+workers_dev = true
+preview_urls = false
 name = "respeako-pronunciation"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
@@ -15,4 +17,4 @@ AZURE_SPEECH_REGION = "southeastasia"
 
 [[kv_namespaces]]
 binding = "USAGE"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "e4704949ed874fde8975b7b716a39f0a"
