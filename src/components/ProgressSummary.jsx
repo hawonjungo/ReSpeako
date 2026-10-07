@@ -4,7 +4,7 @@ import { computeProgress } from '../utils/progress';
 import formatMessage from '../utils/formatMessage';
 import SectionCard from './ui/SectionCard';
 
-const TASK_ORDER = ['wfd', 'rs', 'ra', 'di', 'rl', 'looplab', 'wordformation'];
+const TASK_ORDER = ['ra', 'rs', 'di', 'rl', 'rwfib', 'rfib', 'rop', 'mc', 'swt', 'essay', 'wfd', 'looplab', 'wordformation'];
 
 export default function ProgressSummary({ t, language }) {
   const [progress, setProgress] = useState(null);

@@ -1,12 +1,16 @@
 // Short PTE-style mock test: structure, item selection and skill scoring.
 import shuffleArray from './shuffleArray';
 
-// Exam order, trimmed to about 20 minutes.
+// Exam order (speaking, reading, listening), trimmed to about 30 minutes.
 export const MOCK_STRUCTURE = [
   { type: 'ra', count: 2 },
   { type: 'rs', count: 3 },
   { type: 'di', count: 1 },
   { type: 'rl', count: 1 },
+  { type: 'rwfib', count: 1 },
+  { type: 'mc', count: 1 },
+  { type: 'rop', count: 1 },
+  { type: 'rfib', count: 1 },
   { type: 'wfd', count: 3 },
 ];
 
@@ -16,8 +20,14 @@ export const SKILL_MAP = {
   rs: ['speaking', 'listening'],
   di: ['speaking'],
   rl: ['speaking', 'listening'],
+  rwfib: ['reading', 'writing'],
+  mc: ['reading'],
+  rop: ['reading'],
+  rfib: ['reading'],
   wfd: ['listening', 'writing'],
 };
+
+const SPEAKING_TYPES = new Set(['ra', 'rs', 'di', 'rl']);
 
 export const SKILLS = ['speaking', 'listening', 'reading', 'writing'];
 
@@ -29,11 +39,12 @@ export function buildMockTest(banks, shuffle = shuffleArray) {
 }
 
 /**
- * 0..1 performance for one answered item.
- * Speaking items use the 10-90 estimate, blended with Azure pronunciation when available.
+ * 0..1 performance for one answered item. Reading and dictation use points
+ * scored; speaking items use the 10-90 estimate, blended with Azure
+ * pronunciation when available.
  */
 export function getItemFactor(result) {
-  if (result.type === 'wfd') {
+  if (!SPEAKING_TYPES.has(result.type)) {
     return result.total === 0 ? 0 : result.correct / result.total;
   }
 

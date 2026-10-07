@@ -90,7 +90,7 @@ function encodeBase64Utf8(value) {
   return btoa(binary);
 }
 
-async function callWorker(path, init = {}) {
+export async function callWorker(path, init = {}) {
   const { endpoint, token } = getPronunciationConfig();
   if (!endpoint || !token) throw new PronunciationError('not_configured');
 

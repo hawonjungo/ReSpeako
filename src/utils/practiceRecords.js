@@ -3,6 +3,7 @@
 import { normalizeText } from './scoring';
 import { addReviewItems, logAttempt } from './reviewStore';
 import { describeWeakSounds, getWeakWords } from './pronunciation';
+import { fillPassage } from './reading';
 
 // Function words are not worth a flashcard on their own; sentence cards cover them.
 const SKIP_WORD_CARDS = new Set([
@@ -35,6 +36,19 @@ export function getReadAloudReviewItems(passage, scored, transcript) {
 export function getRepeatSentenceReviewItems(item, scored, transcript) {
   if (!transcript.trim() || scored.contentBand >= 3) return [];
   return [{ kind: 'sentence', text: item.text, source: 'rs' }];
+}
+
+// Fill-in-the-blank misses: a card for each correct word, with its sentence as context.
+export function getBlanksReviewItems(task, item, correctWords, scored) {
+  const passage = fillPassage(item.text, correctWords);
+  return correctWords
+    .filter((word, index) => !scored.results[index])
+    .map((word) => ({
+      kind: 'word',
+      text: word,
+      source: task,
+      note: findSentenceWithWord(passage, word.toLowerCase()) || passage,
+    }));
 }
 
 export function getWeakPronunciationItems(assessment, source) {

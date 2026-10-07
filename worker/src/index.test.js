@@ -128,6 +128,6 @@ describe('pronunciation worker', () => {
       new Request('https://worker.example/usage', { headers: { Authorization: `Bearer ${TOKEN}` } }),
       createEnv()
     );
-    expect(await response.json()).toEqual({ usedSeconds: 0, limitSeconds: 60 });
+    expect(await response.json()).toMatchObject({ usedSeconds: 0, limitSeconds: 60, writingUsed: 0 });
   });
 });

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { scoreDictation, scoreSpeaking } from './scoring';
 import {
   findSentenceWithWord,
+  getBlanksReviewItems,
   getDictationReviewItems,
   getReadAloudReviewItems,
   getRepeatSentenceReviewItems,
@@ -47,5 +48,13 @@ describe('practice review rules', () => {
       { kind: 'pronunciation', text: 'think', source: 'di', note: '/θ/' },
     ]);
     expect(getWeakPronunciationItems(null, 'di')).toEqual([]);
+  });
+});
+
+describe('blank review items', () => {
+  it('creates a card for each missed blank with its sentence', () => {
+    const item = { text: 'Reefs {0} coasts. They are {1}.' };
+    const items = getBlanksReviewItems('rwfib', item, ['protect', 'fragile'], { results: [false, true] });
+    expect(items).toEqual([{ kind: 'word', text: 'protect', source: 'rwfib', note: 'Reefs protect coasts.' }]);
   });
 });

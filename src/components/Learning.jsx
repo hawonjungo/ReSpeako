@@ -6,7 +6,7 @@ import PrimaryButton from './ui/PrimaryButton';
 const learningModules = [
   {
     title: 'Mock Test',
-    description: 'A 20-minute test in exam order with Speaking, Listening, Reading and Writing estimates at the end.',
+    description: 'A 30-minute test in exam order with Speaking, Listening, Reading and Writing estimates at the end.',
     href: '/pte/mock-test',
     accent: 'from-rose-500/15 to-orange-500/10',
   },
@@ -39,6 +39,42 @@ const learningModules = [
     description: 'Hear a short academic lecture once, take notes, and retell the main points in 40 seconds.',
     href: '/pte/retell-lecture',
     accent: 'from-fuchsia-500/15 to-violet-500/10',
+  },
+  {
+    title: 'Reading: Fill in the Blanks',
+    description: 'Dropdown and word-bank gap fills that train collocations, grammar and meaning.',
+    href: '/pte/reading/rwfib',
+    accent: 'from-sky-500/15 to-indigo-500/10',
+  },
+  {
+    title: 'Word Bank Blanks',
+    description: 'Complete a passage from a word bank with extra distractors, just like the exam.',
+    href: '/pte/reading/rfib',
+    accent: 'from-cyan-500/15 to-emerald-500/10',
+  },
+  {
+    title: 'Re-order Paragraphs',
+    description: 'Rebuild the logic of a text and learn how PTE scores each correct pair.',
+    href: '/pte/reading/rop',
+    accent: 'from-amber-500/15 to-yellow-500/10',
+  },
+  {
+    title: 'Multiple Choice',
+    description: 'Single and multiple-answer questions with PTE negative marking.',
+    href: '/pte/reading/mc',
+    accent: 'from-lime-500/15 to-green-500/10',
+  },
+  {
+    title: 'Summarize Written Text',
+    description: 'One sentence, 5-75 words, 10 minutes, with instant form checks and AI feedback.',
+    href: '/pte/writing/swt',
+    accent: 'from-violet-500/15 to-purple-500/10',
+  },
+  {
+    title: 'Write Essay',
+    description: '200-300 words in 20 minutes, scored on PTE traits with corrections and an improved version.',
+    href: '/pte/writing/essay',
+    accent: 'from-pink-500/15 to-rose-500/10',
   },
   {
     title: 'Review Notebook',

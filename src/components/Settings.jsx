@@ -47,12 +47,15 @@ export default function Settings() {
     setMessage(null);
     try {
       const usage = await fetchPronunciationUsage();
+      const writingLine = usage.writingEnabled
+        ? formatMessage(t.writingConnected, { used: usage.writingUsed, limit: usage.writingLimit })
+        : t.writingOff;
       setMessage({
         type: 'success',
-        text: formatMessage(t.connected, {
+        text: `${formatMessage(t.connected, {
           used: Math.round(usage.usedSeconds / 60),
           limit: Math.round(usage.limitSeconds / 60),
-        }),
+        })} ${writingLine}`,
       });
     } catch (error) {
       const code = error instanceof PronunciationError ? error.code : 'default';

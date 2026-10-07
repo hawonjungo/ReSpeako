@@ -1,6 +1,8 @@
-// ReSpeako pronunciation proxy (Cloudflare Worker).
-// Keeps the Azure Speech key server-side and only serves requests that carry
-// the owner's personal access token, with a monthly audio-seconds cap.
+// ReSpeako pronunciation and writing proxy (Cloudflare Worker).
+// Keeps the Azure Speech and Gemini keys server-side and only serves requests that
+// carry the owner's personal access token, with monthly usage caps.
+
+import { getWritingUsage, handleWriting } from './writing';
 
 const MAX_AUDIO_SECONDS = 30; // Azure pronunciation assessment limit (REST, short audio).
 const WAV_HEADER_BYTES = 44;
@@ -172,8 +174,7 @@ export default {
     }
 
     // Fail closed when the Worker is not fully configured.
-    if (!env.APP_ACCESS_TOKEN || !env.AZURE_SPEECH_KEY || !env.USAGE
-      || (!env.AZURE_SPEECH_REGION && !env.AZURE_SPEECH_ENDPOINT)) {
+    if (!env.APP_ACCESS_TOKEN || !env.USAGE) {
       return json({ error: 'server_not_configured' }, 500, cors);
     }
 
@@ -187,11 +188,25 @@ export default {
 
     if (pathname === '/usage' && request.method === 'GET') {
       const { usedSeconds, limitSeconds } = await getUsage(env);
-      return json({ usedSeconds, limitSeconds }, 200, cors);
+      const writing = await getWritingUsage(env);
+      return json({
+        usedSeconds,
+        limitSeconds,
+        writingUsed: writing.used,
+        writingLimit: writing.limit,
+        writingEnabled: Boolean(env.GEMINI_API_KEY),
+      }, 200, cors);
     }
 
     if (pathname === '/assess' && request.method === 'POST') {
+      if (!env.AZURE_SPEECH_KEY || (!env.AZURE_SPEECH_REGION && !env.AZURE_SPEECH_ENDPOINT)) {
+        return json({ error: 'server_not_configured' }, 500, cors);
+      }
       return handleAssess(request, env, cors);
+    }
+
+    if (pathname === '/writing' && request.method === 'POST') {
+      return handleWriting(request, env, cors);
     }
 
     return json({ error: 'not_found' }, 404, cors);

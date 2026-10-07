@@ -21,6 +21,8 @@ import ReadAloud from './components/pte/ReadAloud'
 import Settings from './components/Settings'
 import OpenSpeakingPractice from './components/pte/OpenSpeakingPractice'
 import MockTest from './components/pte/MockTest'
+import ReadingPractice from './components/pte/reading/ReadingPractice'
+import WritingPractice from './components/pte/writing/WritingPractice'
 
 function App() {
   return (
@@ -47,6 +49,11 @@ function App() {
               <Route path="/pte/describe-image" element={<OpenSpeakingPractice key="di" task="di" />} />
               <Route path="/pte/retell-lecture" element={<OpenSpeakingPractice key="rl" task="rl" />} />
               <Route path="/pte/mock-test" element={<MockTest />} />
+              {['rwfib', 'rfib', 'rop', 'mc'].map((task) => (
+                <Route key={task} path={`/pte/reading/${task}`} element={<ReadingPractice key={task} task={task} />} />
+              ))}
+              <Route path="/pte/writing/swt" element={<WritingPractice key="swt" task="swt" />} />
+              <Route path="/pte/writing/essay" element={<WritingPractice key="essay" task="essay" />} />
             </Routes>
             <CatPawBtn />
           </div>

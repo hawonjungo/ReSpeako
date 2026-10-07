@@ -5,6 +5,7 @@ import { translations } from '../../i18n/translations';
 import { readAloudBank, repeatSentenceBank } from '../../data/pte/speaking';
 import { describeImageBank, retellLectureBank } from '../../data/pte/openSpeaking';
 import { writeFromDictationBank } from '../../data/pte/writeFromDictation';
+import { READING_TASKS } from './reading/readingTasks';
 import useTextToSpeech from '../../hooks/useTextToSpeech';
 import { buildMockTest, computeMockScores, MOCK_STRUCTURE, SKILLS } from '../../utils/mockTest';
 import { getAttempts, logAttempt } from '../../utils/reviewStore';
@@ -16,6 +17,7 @@ import PrimaryButton from '../ui/PrimaryButton';
 import EngineBadge from './EngineBadge';
 import SpeakingItemRunner from './mock/SpeakingItemRunner';
 import DictationItemRunner from './mock/DictationItemRunner';
+import ReadingItemRunner from './mock/ReadingItemRunner';
 
 const BANKS = {
   ra: readAloudBank,
@@ -23,6 +25,7 @@ const BANKS = {
   di: describeImageBank,
   rl: retellLectureBank,
   wfd: writeFromDictationBank,
+  ...Object.fromEntries(Object.entries(READING_TASKS).map(([type, config]) => [type, config.bank])),
 };
 const HISTORY_SIZE = 5;
 
@@ -211,9 +214,20 @@ export default function MockTest() {
                 <div className="h-full bg-cyan-500 transition-all" style={{ width: `${(index / items.length) * 100}%` }} />
               </div>
 
-              {current.type === 'wfd' ? (
+              {current.type === 'wfd' && (
                 <DictationItemRunner key={index} item={current.item} onComplete={handleItemComplete} tm={tm} />
-              ) : (
+              )}
+              {READING_TASKS[current.type] && (
+                <ReadingItemRunner
+                  key={index}
+                  type={current.type}
+                  item={current.item}
+                  onComplete={handleItemComplete}
+                  tm={tm}
+                  labels={translations[language].reading.labels}
+                />
+              )}
+              {['ra', 'rs', 'di', 'rl'].includes(current.type) && (
                 <SpeakingItemRunner
                   key={index}
                   type={current.type}

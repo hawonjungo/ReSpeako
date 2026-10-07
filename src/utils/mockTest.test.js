@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildMockTest, computeMockScores, getItemFactor, MOCK_STRUCTURE } from './mockTest';
 
 const bank = (prefix) => Array.from({ length: 5 }, (_, index) => ({ id: `${prefix}-${index}` }));
-const banks = { ra: bank('ra'), rs: bank('rs'), di: bank('di'), rl: bank('rl'), wfd: bank('wfd') };
+const banks = Object.fromEntries(MOCK_STRUCTURE.map(({ type }) => [type, bank(type)]));
 
 describe('buildMockTest', () => {
   it('follows the exam order and section sizes', () => {
@@ -14,8 +14,9 @@ describe('buildMockTest', () => {
 });
 
 describe('getItemFactor', () => {
-  it('uses word accuracy for dictation', () => {
+  it('uses points scored for dictation and reading', () => {
     expect(getItemFactor({ type: 'wfd', correct: 6, total: 8 })).toBe(0.75);
+    expect(getItemFactor({ type: 'rop', correct: 1, total: 3 })).toBeCloseTo(1 / 3);
   });
 
   it('maps the 10-90 estimate and blends in Azure pronunciation', () => {

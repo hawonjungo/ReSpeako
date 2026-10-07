@@ -10,10 +10,14 @@ ALLOWED_ORIGINS = "https://respeako.relifes.net,http://localhost:5173,https://lo
 # Monthly audio cap in seconds. 16200 = 4.5 hours, below the 5-hour Azure F0 free tier.
 MONTHLY_LIMIT_SECONDS = "16200"
 AZURE_SPEECH_REGION = "southeastasia"
+# AI writing feedback (Gemini free tier): model and monthly request cap.
+GEMINI_MODEL = "gemini-3.8-flash"
+MONTHLY_WRITING_LIMIT = "300"
 
 # Secrets (never commit these). Set them with:
 #   npx wrangler secret put AZURE_SPEECH_KEY
 #   npx wrangler secret put APP_ACCESS_TOKEN
+#   npx wrangler secret put GEMINI_API_KEY
 
 [[kv_namespaces]]
 binding = "USAGE"

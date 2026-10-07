@@ -1,10 +1,11 @@
-# ReSpeako Pronunciation Worker
+# ReSpeako Worker (phát âm + chấm viết)
 
-Cloudflare Worker đứng giữa app và Azure Pronunciation Assessment.
+Cloudflare Worker đứng giữa app và hai dịch vụ: Azure Pronunciation Assessment (chấm phát âm) và Google Gemini (chấm Summarize Written Text và Essay).
 
-- Key Azure **chỉ nằm trên Worker** (secret), không bao giờ có trong code web/app.
+- Key Azure và key Gemini **chỉ nằm trên Worker** (secret), không bao giờ có trong code web/app.
 - Chỉ request có **mã truy cập riêng của bạn** (`APP_ACCESS_TOKEN`) mới được chấm. Người khác mở trang web cũng không dùng được.
 - Worker tự đếm số giây audio mỗi tháng và **dừng ở 4,5 giờ** (`MONTHLY_LIMIT_SECONDS`), dưới mức 5 giờ miễn phí của Azure.
+- Chấm viết bằng AI bị giới hạn **300 lượt mỗi tháng** (`MONTHLY_WRITING_LIMIT`).
 - Chỉ nhận request trình duyệt từ các origin trong `ALLOWED_ORIGINS`.
 
 ## 1. Tạo Azure Speech (gói miễn phí)
@@ -36,6 +37,19 @@ npx wrangler deploy
 ```
 
 `wrangler deploy` in ra địa chỉ dạng `https://respeako-pronunciation.<tên>.workers.dev`.
+
+## 2b. Bật chấm viết bằng Gemini (miễn phí)
+
+1. Vào https://aistudio.google.com/apikey, đăng nhập tài khoản Google, bấm **Create API key**. Gói miễn phí không cần thẻ.
+2. Trong thư mục `worker/`:
+
+```bash
+npx wrangler secret put GEMINI_API_KEY
+```
+
+Không cần deploy lại: secret có hiệu lực ngay.
+
+Lưu ý: với gói miễn phí, Google có thể dùng nội dung gửi lên (bài viết luyện tập) để cải thiện sản phẩm. Đừng viết thông tin cá nhân vào bài luyện. Gói miễn phí cũng giới hạn số lượt mỗi phút; nếu app báo "Gemini đang bận", hãy đợi khoảng một phút. Muốn đổi model, sửa `GEMINI_MODEL` trong `wrangler.toml` rồi chạy `npx wrangler deploy`.
 
 ## 3. Kết nối app
 
