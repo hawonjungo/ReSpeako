@@ -10,6 +10,11 @@ const RECOGNITION_LAG_MS = 500;
 const STOP_TIMEOUT_MS = 2500;
 const TICK_MS = 100;
 
+// Mobile browsers give the mic to one consumer at a time, so MediaRecorder and
+// Web Speech recognition cannot run together there (recognition fails with audio-capture).
+const isMobileBrowser = typeof navigator !== 'undefined'
+  && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 /**
  * One timed speaking response, PTE style. Closes the mic after `maxSeconds`
  * or after `silenceMs` without speech.
@@ -44,8 +49,10 @@ export default function useSpeakingAttempt({
 
   const useAzure = engine === 'azure';
   const recorder = useAudioRecorder();
-  // In browser mode, native speech recognition holds the mic, so recording is web-only.
-  const recordingAvailable = recorder.isSupported && (useAzure || !Capacitor.isNativePlatform());
+  // In browser mode, speech recognition holds the mic on native and mobile browsers,
+  // so recording alongside it is desktop-web only.
+  const recordingAvailable = recorder.isSupported
+    && (useAzure || (!Capacitor.isNativePlatform() && !isMobileBrowser));
   const canRecord = useAzure ? recorder.isSupported : recordAudio && recordingAvailable;
 
   const updatePhase = (next) => {

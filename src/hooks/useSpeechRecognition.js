@@ -2,6 +2,22 @@ import { useEffect, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 
+// Web Speech API error codes -> learner-facing messages. Codes mapped to '' are not failures.
+const WEB_ERROR_MESSAGES = {
+  aborted: '',
+  'no-speech': 'No speech detected. Tap the mic and try again.',
+  'audio-capture': 'No microphone found, or it is being used by another app or tab.',
+  'not-allowed': 'Microphone access is blocked. Allow it in the browser settings (the site must use HTTPS).',
+  'service-not-allowed': 'Speech recognition is disabled in this browser. Try Chrome or Edge.',
+  // The browser could not reach its vendor's speech service: usually a browser without
+  // access to it (Brave, Opera, Chromium, embedded webviews) or a VPN/firewall block.
+  network: "This browser can't reach its speech recognition service. Use Google Chrome or Microsoft Edge, and turn off VPN or ad-blocking for this site.",
+  'language-not-supported': 'English speech recognition is not available in this browser.',
+};
+
+// The native plugin rejects with "No match" or similar when the learner stays silent.
+const isNativeNoSpeech = (error) => /no match|no speech|didn't understand/i.test(String(error?.message || error));
+
 export default function useSpeechRecognition({ onTranscriptChange }) {
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState('');
@@ -26,9 +42,9 @@ export default function useSpeechRecognition({ onTranscriptChange }) {
     const setupRecognition = async () => {
       if (Capacitor.isNativePlatform()) {
         try {
-          const hasPermission = await SpeechRecognition.hasPermission();
-          if (!hasPermission.granted) {
-            await SpeechRecognition.requestPermission();
+          const status = await SpeechRecognition.checkPermissions();
+          if (status.speechRecognition !== 'granted') {
+            await SpeechRecognition.requestPermissions();
           }
         } catch (err) {
           console.warn('Permission error:', err);
@@ -55,7 +71,10 @@ export default function useSpeechRecognition({ onTranscriptChange }) {
               onTranscriptChangeRef.current?.(transcript);
             } catch (error) {
               if (!userStoppedRef.current) {
-                setSpeechError('Speech recognition failed.');
+                console.warn('Native speech recognition error:', error);
+                setSpeechError(isNativeNoSpeech(error)
+                  ? WEB_ERROR_MESSAGES['no-speech']
+                  : 'Speech recognition failed.');
               }
             } finally {
               setIsListening(false);
@@ -110,8 +129,10 @@ export default function useSpeechRecognition({ onTranscriptChange }) {
           );
         };
 
-        recognition.onerror = () => {
-          setSpeechError('Speech recognition failed.');
+        recognition.onerror = (event) => {
+          console.warn('Speech recognition error:', event.error, event.message);
+          const message = WEB_ERROR_MESSAGES[event.error];
+          setSpeechError(message ?? `Speech recognition failed (${event.error}).`);
           setIsListening(false);
         };
 
@@ -120,7 +141,21 @@ export default function useSpeechRecognition({ onTranscriptChange }) {
         };
 
         if (!cancelled) {
-          recognitionRef.current = recognition;
+          recognitionRef.current = {
+            start: () => {
+              try {
+                recognition.start();
+              } catch (err) {
+                // InvalidStateError: a session is still running or closing.
+                console.warn('Speech recognition start failed:', err);
+                if (err?.name !== 'InvalidStateError') {
+                  setSpeechError('Speech recognition could not start.');
+                }
+              }
+            },
+            stop: () => recognition.stop(),
+            raw: recognition,
+          };
         }
       }
     };
@@ -130,7 +165,7 @@ export default function useSpeechRecognition({ onTranscriptChange }) {
     return () => {
       cancelled = true;
 
-      const recognition = recognitionRef.current;
+      const recognition = recognitionRef.current?.raw;
 
       if (recognition) {
         try {
@@ -138,7 +173,7 @@ export default function useSpeechRecognition({ onTranscriptChange }) {
           recognition.onresult = null;
           recognition.onerror = null;
           recognition.onend = null;
-          recognition.stop?.();
+          recognition.abort?.();
         } catch (err) {
           console.warn('Cleanup speech recognition failed:', err);
         }
