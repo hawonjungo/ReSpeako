@@ -4,16 +4,12 @@ import useSpeechRecognition from './useSpeechRecognition';
 import useAudioRecorder from './useAudioRecorder';
 import { assessPronunciation, PronunciationError } from '../utils/pronunciation';
 import { createVoiceDetector } from '../utils/voiceActivity';
+import { isMobileBrowser } from '../utils/platform';
 
 // Interim results arrive a little after the learner starts talking.
 const RECOGNITION_LAG_MS = 500;
 const STOP_TIMEOUT_MS = 2500;
 const TICK_MS = 100;
-
-// Mobile browsers give the mic to one consumer at a time, so MediaRecorder and
-// Web Speech recognition cannot run together there (recognition fails with audio-capture).
-const isMobileBrowser = typeof navigator !== 'undefined'
-  && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 /**
  * One timed speaking response, PTE style. Closes the mic after `maxSeconds`
@@ -49,8 +45,8 @@ export default function useSpeakingAttempt({
 
   const useAzure = engine === 'azure';
   const recorder = useAudioRecorder();
-  // In browser mode, speech recognition holds the mic on native and mobile browsers,
-  // so recording alongside it is desktop-web only.
+  // In browser mode, speech recognition holds the mic on native and mobile browsers
+  // (MediaRecorder alongside it makes recognition fail), so recording is desktop-web only.
   const recordingAvailable = recorder.isSupported
     && (useAzure || (!Capacitor.isNativePlatform() && !isMobileBrowser));
   const canRecord = useAzure ? recorder.isSupported : recordAudio && recordingAvailable;
